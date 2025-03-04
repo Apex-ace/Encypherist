@@ -4,112 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Encypherist</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    {% set bg_color = config.THEME.background_color if config.THEME else "#000000" %}
-    {% set text_color = config.THEME.text_color if config.THEME else "#FFFFFF" %}
-    {% set primary_color = config.THEME.primary_color if config.THEME else "#00FF00" %}
-    {% set secondary_color = config.THEME.secondary_color if config.THEME else "#000000" %}
-    {% set accent_color = config.THEME.accent_color if config.THEME else "#1a1a1a" %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #00FF00;
+            --secondary-color: #000000;
+            --accent-color: #1a1a1a;
+            --text-color: #FFFFFF;
+            --background-color: #0a0a0a;
+        }
+
         body {
-            background-color: "{{ bg_color|safe }}";
-            color: "{{ text_color|safe }}";
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
         }
-        .card {
-            background-color: "{{ accent_color|safe }}";
-            border: 1px solid "{{ primary_color|safe }}";
+
+        .glass {
+            background: rgba(0, 255, 0, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-color);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 255, 0, 0.1);
         }
+
+        .form-control {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary-color);
+            color: var(--text-color);
+            border-radius: 12px;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
         .btn-primary {
-            background-color: "{{ primary_color|safe }}";
-            border-color: "{{ primary_color|safe }}";
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
+
         .btn-primary:hover {
-            background-color: "{{ secondary_color|safe }}";
-            border-color: "{{ primary_color|safe }}";
-        }
-        .form-control, .form-select {
-            background-color: "{{ bg_color|safe }}";
-            color: "{{ text_color|safe }}";
-            border: 1px solid "{{ primary_color|safe }}";
-        }
-        .form-control:focus, .form-select:focus {
-            background-color: "{{ bg_color|safe }}";
-            color: "{{ text_color|safe }}";
-            border-color: "{{ primary_color|safe }}";
-            box-shadow: 0 0 0 0.25rem rgba(0, 255, 0, 0.25);
-        }
-        .alert {
-            border-color: "{{ primary_color|safe }}";
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
         }
     </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <h2>Register for {{ config.THEME.brand_name|default('Encypherist') }}</h2>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-md mx-auto">
+            <div class="glass p-8">
+                <h2 class="text-3xl font-bold text-center mb-8" style="color: var(--primary-color)">Register for Encypherist</h2>
+                
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="bg-red-500 bg-opacity-10 border border-red-500 text-red-500 px-4 py-3 rounded-lg mb-6">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('register') }}" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div>
+                        <label for="username" class="block text-sm font-medium mb-2" style="color: var(--primary-color)">
+                            Email (Gmail only)
+                        </label>
+                        <input type="email" class="form-control w-full" id="username" name="username" 
+                               required pattern=".*@gmail\.com$" 
+                               title="Please use a Gmail address">
+                        <p class="text-xs mt-1 text-gray-400">Must be a Gmail address</p>
                     </div>
-                    <div class="card-body">
-                        {% with messages = get_flashed_messages() %}
-                            {% if messages %}
-                                {% for message in messages %}
-                                    <div class="alert alert-danger">{{ message }}</div>
-                                {% endfor %}
-                            {% endif %}
-                        {% endwith %}
 
-                        <form method="POST" action="{{ url_for('register') }}" novalidate>
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Email (Gmail only)</label>
-                                <input type="email" class="form-control" id="username" name="username" 
-                                       required pattern=".*@gmail\.com$" 
-                                       title="Please use a Gmail address">
-                                <div class="form-text text-muted">Must be a Gmail address</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" 
-                                       required minlength="6">
-                                <div class="form-text text-muted">Minimum 6 characters</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="confirm_password" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
-                                       required minlength="6">
-                                <div class="form-text text-muted">Re-enter your password</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="role" class="form-label">Role</label>
-                                <select class="form-select" id="role" name="role" required>
-                                    <option value="">Select a role</option>
-                                    <option value="student">Student</option>
-                                    <option value="organizer">Event Organizer</option>
-                                </select>
-                            </div>
-
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" id="submitBtn">
-                                    Register
-                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                </button>
-                            </div>
-                        </form>
+                    <div>
+                        <label for="password" class="block text-sm font-medium mb-2" style="color: var(--primary-color)">
+                            Password
+                        </label>
+                        <input type="password" class="form-control w-full" id="password" name="password" 
+                               required minlength="6">
+                        <p class="text-xs mt-1 text-gray-400">Minimum 6 characters</p>
                     </div>
-                    <div class="card-footer text-center">
-                        <p class="mb-0">Already have an account? <a href="{{ url_for('login') }}" class="text-primary">Login here</a></p>
+
+                    <div>
+                        <label for="confirm_password" class="block text-sm font-medium mb-2" style="color: var(--primary-color)">
+                            Confirm Password
+                        </label>
+                        <input type="password" class="form-control w-full" id="confirm_password" name="confirm_password" 
+                               required minlength="6">
                     </div>
-                </div>
+
+                    <div>
+                        <label for="role" class="block text-sm font-medium mb-2" style="color: var(--primary-color)">
+                            Role
+                        </label>
+                        <select class="form-control w-full" id="role" name="role" required>
+                            <option value="">Select a role</option>
+                            <option value="student">Student</option>
+                            <option value="organizer">Event Organizer</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full" id="submitBtn">
+                        Register
+                        <span class="spinner-border spinner-border-sm hidden" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+
+                <p class="text-center mt-6 text-sm">
+                    Already have an account? 
+                    <a href="{{ url_for('login') }}" class="text-green-400 hover:text-green-300 transition-colors">
+                        Login here
+                    </a>
+                </p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Client-side email validation
         document.getElementById('username').addEventListener('input', function(e) {
@@ -147,7 +171,7 @@
             const submitBtn = document.getElementById('submitBtn');
             const spinner = submitBtn.querySelector('.spinner-border');
             submitBtn.disabled = true;
-            spinner.classList.remove('d-none');
+            spinner.classList.remove('hidden');
         });
     </script>
 </body>
