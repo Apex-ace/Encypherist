@@ -5,32 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Encypherist</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% set bg_color = config.THEME.background_color %}
+    {% set text_color = config.THEME.text_color %}
+    {% set primary_color = config.THEME.primary_color %}
+    {% set secondary_color = config.THEME.secondary_color %}
+    {% set accent_color = config.THEME.accent_color %}
     <style>
         body {
-            background-color: {{ config.THEME.background_color }};
-            color: {{ config.THEME.text_color }};
+            background-color: "{{ bg_color|safe }}";
+            color: "{{ text_color|safe }}";
         }
         .card {
-            background-color: {{ config.THEME.accent_color }};
-            border: 1px solid {{ config.THEME.primary_color }};
+            background-color: "{{ accent_color|safe }}";
+            border: 1px solid "{{ primary_color|safe }}";
         }
         .btn-primary {
-            background-color: {{ config.THEME.primary_color }};
-            border-color: {{ config.THEME.primary_color }};
+            background-color: "{{ primary_color|safe }}";
+            border-color: "{{ primary_color|safe }}";
         }
         .btn-primary:hover {
-            background-color: {{ config.THEME.secondary_color }};
-            border-color: {{ config.THEME.primary_color }};
+            background-color: "{{ secondary_color|safe }}";
+            border-color: "{{ primary_color|safe }}";
         }
         .form-control {
-            background-color: {{ config.THEME.background_color }};
-            color: {{ config.THEME.text_color }};
-            border: 1px solid {{ config.THEME.primary_color }};
+            background-color: "{{ bg_color|safe }}";
+            color: "{{ text_color|safe }}";
+            border: 1px solid "{{ primary_color|safe }}";
         }
         .form-control:focus {
-            background-color: {{ config.THEME.background_color }};
-            color: {{ config.THEME.text_color }};
-            border-color: {{ config.THEME.primary_color }};
+            background-color: "{{ bg_color|safe }}";
+            color: "{{ text_color|safe }}";
+            border-color: "{{ primary_color|safe }}";
             box-shadow: 0 0 0 0.25rem rgba(0, 255, 0, 0.25);
         }
     </style>
