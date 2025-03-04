@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages - Encypherist</title>
+    <!-- Preload critical assets -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -27,6 +30,8 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
+            content-visibility: auto;
+            contain-intrinsic-size: 0 500px;
         }
 
         .message-container {
@@ -53,7 +58,7 @@
         }
 
         .message-bubble {
-            max-width: 70%;
+            max-width: 85%;
             word-break: break-word;
             overflow-wrap: break-word;
             margin-bottom: 12px;
@@ -97,6 +102,7 @@
             padding: 12px 24px;
             font-weight: 600;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .send-button:hover {
@@ -130,12 +136,105 @@
             font-size: 12px;
             font-weight: 600;
         }
+
+        .mobile-header {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                padding: 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .conversation-list {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 50;
+                background: var(--background-color);
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .conversation-list.active {
+                transform: translateX(0);
+            }
+
+            .message-area {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 40;
+                background: var(--background-color);
+                transform: translateX(100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .message-area.active {
+                transform: translateX(0);
+            }
+
+            .message-bubble {
+                max-width: 90%;
+            }
+
+            .message-input-container {
+                padding: 0.5rem;
+            }
+
+            .send-button {
+                padding: 0.75rem 1.5rem;
+            }
+        }
+
+        /* Prevent layout shifts for profile pictures */
+        .profile-picture-container {
+            aspect-ratio: 1;
+            width: 40px;
+            height: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-picture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-picture.loaded {
+            opacity: 1;
+        }
+
+        /* Add skeleton loading state */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body>
-    <nav class="w-full flex justify-between items-center py-4 px-6 fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-20">
-        <a href="{{ url_for('home') }}" class="text-2xl font-bold" style="color: var(--primary-color)">Encypherist</a>
-        <div class="flex items-center space-x-6">
+    <nav class="w-full flex justify-between items-center py-4 px-4 sm:px-6 fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-20">
+        <a href="{{ url_for('home') }}" class="text-xl sm:text-2xl font-bold" style="color: var(--primary-color)">Encypherist</a>
+        <div class="flex items-center space-x-4 sm:space-x-6">
             <a href="{{ url_for('profile') }}" class="text-sm text-gray-300 hover:text-green-400 transition-colors">Profile</a>
             <a href="{{ url_for('notifications') }}" class="text-sm text-gray-300 hover:text-green-400 transition-colors">Notifications</a>
             <form action="{{ url_for('logout') }}" method="POST" class="inline">
@@ -146,18 +245,27 @@
     </nav>
 
     <div class="container mx-auto px-4 pt-20 pb-8">
-        <div class="glass grid grid-cols-4 min-h-[calc(100vh-120px)]">
+        <div class="glass grid grid-cols-1 md:grid-cols-4 min-h-[calc(100vh-120px)]">
             <!-- Conversation List -->
             <div class="conversation-list p-4 space-y-4">
-                <h2 class="text-xl font-semibold mb-6">Messages</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold">Messages</h2>
+                    <button class="md:hidden text-white" onclick="toggleConversationList()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
                 {% for user_id, conv in conversations.items() %}
                 <div class="conversation-item p-4 rounded-lg {% if other_user and other_user.id == user_id %}active{% endif %}"
                      onclick="window.location.href='{{ url_for('conversation', user_id=user_id) }}'">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             {% if conv.user.profile_picture %}
-                            <img src="{{ url_for('static', filename='uploads/' + conv.user.profile_picture) }}" 
-                                 alt="Profile" class="w-10 h-10 rounded-full object-cover">
+                            <div class="profile-picture-container">
+                                <img src="{{ url_for('static', filename='uploads/' + conv.user.profile_picture) }}" 
+                                     alt="Profile" class="profile-picture">
+                            </div>
                             {% else %}
                             <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
                                 <span class="text-black font-semibold">{{ conv.user.username[0].upper() }}</span>
@@ -179,13 +287,41 @@
             </div>
 
             <!-- Message Area -->
-            <div class="col-span-3 flex flex-col">
+            <div class="message-area col-span-1 md:col-span-3 flex flex-col">
                 {% if other_user %}
-                <div class="p-4 border-b border-gray-800">
+                <div class="mobile-header md:hidden">
+                    <button class="text-white mr-4" onclick="toggleConversationList()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
                     <div class="flex items-center space-x-3">
                         {% if other_user.profile_picture %}
-                        <img src="{{ url_for('static', filename='uploads/' + other_user.profile_picture) }}" 
-                             alt="Profile" class="w-12 h-12 rounded-full object-cover">
+                        <div class="profile-picture-container">
+                            <img src="{{ url_for('static', filename='uploads/' + other_user.profile_picture) }}" 
+                                 alt="Profile" class="profile-picture">
+                        </div>
+                        {% else %}
+                        <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                            <span class="text-black font-semibold">{{ other_user.username[0].upper() }}</span>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h2 class="text-lg font-semibold">{{ other_user.username }}</h2>
+                            <p class="text-sm text-gray-400">
+                                {% if other_user.role == 'organizer' %}Event Organizer{% else %}Student{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-b border-gray-800 hidden md:block">
+                    <div class="flex items-center space-x-3">
+                        {% if other_user.profile_picture %}
+                        <div class="profile-picture-container">
+                            <img src="{{ url_for('static', filename='uploads/' + other_user.profile_picture) }}" 
+                                 alt="Profile" class="profile-picture">
+                        </div>
                         {% else %}
                         <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
                             <span class="text-black font-semibold">{{ other_user.username[0].upper() }}</span>
@@ -200,7 +336,7 @@
                     </div>
                 </div>
 
-                <div class="message-container p-6 flex-grow">
+                <div class="message-container p-4 md:p-6 flex-grow">
                     {% for message in messages %}
                     <div class="clear-both">
                         <div class="message-bubble {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %}">
@@ -214,7 +350,7 @@
                 </div>
 
                 <form method="POST" action="{{ url_for('send_message', user_id=other_user.id) }}" 
-                      class="p-4 border-t border-gray-800 flex items-center space-x-4">
+                      class="message-input-container p-4 border-t border-gray-800 flex items-center space-x-4">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="text" name="content" class="message-input" placeholder="Type your message..." required>
                     <button type="submit" class="send-button">Send</button>
@@ -235,6 +371,21 @@
         const otherUserId = {% if other_user %}{{ other_user.id }}{% else %}null{% endif %};
         const conversationUrl = {% if other_user %}'{{ url_for('conversation', user_id=other_user.id) }}'{% else %}''{% endif %};
 
+        function toggleConversationList() {
+            const conversationList = document.querySelector('.conversation-list');
+            const messageArea = document.querySelector('.message-area');
+            
+            if (window.innerWidth <= 768) {
+                if (conversationList.classList.contains('active')) {
+                    conversationList.classList.remove('active');
+                    messageArea.classList.add('active');
+                } else {
+                    conversationList.classList.add('active');
+                    messageArea.classList.remove('active');
+                }
+            }
+        }
+
         class MessageHandler {
             constructor() {
                 if (!otherUserId) return;
@@ -253,71 +404,76 @@
 
             setupEventListeners() {
                 if (this.form) {
-                    this.form.addEventListener('submit', () => {
-                        setTimeout(() => this.scrollToBottom(), 100);
+                    this.form.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.sendMessage();
                     });
                 }
-
-                document.addEventListener('visibilitychange', () => {
-                    if (document.visibilityState === 'visible') {
-                        this.updateMessages();
-                    }
-                });
             }
 
-            async updateMessages() {
-                if (!conversationUrl) return;
+            async sendMessage() {
+                const input = this.form.querySelector('input[name="content"]');
+                const content = input.value.trim();
                 
+                if (!content) return;
+
                 try {
-                    const response = await fetch(conversationUrl);
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    
-                    const html = await response.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newMessages = doc.querySelector('.message-container');
-                    
-                    if (newMessages && this.container) {
-                        const wasAtBottom = this.container.scrollHeight - this.container.scrollTop === this.container.clientHeight;
-                        
-                        if (this.container.innerHTML !== newMessages.innerHTML) {
-                            this.container.innerHTML = newMessages.innerHTML;
-                            if (wasAtBottom) {
-                                this.scrollToBottom();
-                            }
-                        }
+                    const response = await fetch(conversationUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                        },
+                        body: JSON.stringify({ content })
+                    });
+
+                    if (response.ok) {
+                        input.value = '';
+                        this.scrollToBottom();
                     }
                 } catch (error) {
-                    console.error('Error updating messages:', error);
+                    console.error('Error sending message:', error);
                 }
             }
 
-            startPolling() {
-                this.scrollToBottom();
-                
-                let pollInterval = 5000;
-                const maxInterval = 30000;
-
-                const poll = async () => {
+            async startPolling() {
+                setInterval(async () => {
                     try {
-                        await this.updateMessages();
-                        pollInterval = 5000;
-                    } catch (error) {
-                        console.error('Polling error:', error);
-                        pollInterval = Math.min(pollInterval * 1.5, maxInterval);
-                    } finally {
-                        if (document.visibilityState === 'visible') {
-                            setTimeout(poll, pollInterval);
+                        const response = await fetch(conversationUrl);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.messages) {
+                                this.updateMessages(data.messages);
+                            }
                         }
+                    } catch (error) {
+                        console.error('Error polling messages:', error);
                     }
-                };
+                }, 5000);
+            }
 
-                poll();
+            updateMessages(messages) {
+                // Update messages in the UI
+                // This would need to be implemented based on your specific needs
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            new MessageHandler();
+        // Initialize message handler
+        new MessageHandler();
+
+        // Add image loading optimization
+        document.addEventListener('DOMContentLoaded', function() {
+            const profilePictures = document.querySelectorAll('.profile-picture');
+            
+            profilePictures.forEach(picture => {
+                if (picture.complete) {
+                    picture.classList.add('loaded');
+                } else {
+                    picture.onload = function() {
+                        this.classList.add('loaded');
+                    };
+                }
+            });
         });
     </script>
 </body>

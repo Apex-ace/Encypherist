@@ -86,6 +86,25 @@
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-description {
+            font-size: 1rem;
+        }
+        
+        .floating {
+            animation: none;
+            transform: none;
+        }
+        
+        .lottie-container {
+            height: 300px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -94,41 +113,43 @@
 
 <!-- Hero Section -->
 <section class="min-h-screen flex items-center -mt-24">
-    <div class="container mx-auto">
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-            <div class="space-y-8">
-                <div class="space-y-4">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div class="space-y-6 md:space-y-8">
+                <div class="space-y-2 md:space-y-4">
                     <span class="tech-badge">AI</span>
                     <span class="tech-badge">IoT</span>
                     <span class="tech-badge">Cybersecurity</span>
                 </div>
-                <h1 class="text-6xl md:text-7xl font-extrabold leading-tight">
+                <h1 class="hero-title text-4xl md:text-7xl font-extrabold leading-tight">
                     Innovate
                     <span class="gradient-text block">Tech Events</span>
                     For Tomorrow
                 </h1>
-                <p class="text-xl text-gray-400 leading-relaxed">
+                <p class="hero-description text-lg md:text-xl text-gray-400 leading-relaxed">
                     Encypherist is your gateway to cutting-edge tech events. From AI workshops to IoT hackathons and cybersecurity challenges, join us in shaping the future of technology. Connect with industry experts, collaborate with peers, and transform your ideas into reality.
                 </p>
-                <div class="flex flex-wrap gap-6">
-                    <a href="{{ url_for('home') }}" class="btn-primary">
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                    <a href="{{ url_for('home') }}" class="btn-primary text-center">
                         Explore Tech Events
                     </a>
-                    <a href="{{ url_for('register') }}?role=organizer" class="btn-secondary">
+                    <a href="{{ url_for('register') }}?role=organizer" class="btn-secondary text-center">
                         Host an Event
                     </a>
                 </div>
             </div>
-            <div class="relative">
+            <div class="relative order-first md:order-last">
                 <div class="floating">
-                    <lottie-player
-                        src="https://assets2.lottiefiles.com/packages/lf20_uwh5hj2q.json"
-                        background="transparent"
-                        speed="1"
-                        style="width: 100%; height: 400px;"
-                        loop
-                        autoplay>
-                    </lottie-player>
+                    <div class="lottie-container">
+                        <lottie-player
+                            src="https://assets2.lottiefiles.com/packages/lf20_uwh5hj2q.json"
+                            background="transparent"
+                            speed="1"
+                            style="width: 100%; height: 400px;"
+                            loop
+                            autoplay>
+                        </lottie-player>
+                    </div>
                 </div>
             </div>
         </div>
@@ -136,23 +157,23 @@
 </section>
 
 <!-- Featured Events Section -->
-<section id="featured" class="py-20">
-    <div class="container mx-auto">
-        <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Featured Tech Events</h2>
-        <div class="grid md:grid-cols-3 gap-8">
+<section id="featured" class="py-12 md:py-20">
+    <div class="container mx-auto px-4 sm:px-6">
+        <h2 class="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-center gradient-text">Featured Tech Events</h2>
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             {% for event in featured_events %}
-            <div class="glass-card p-6 group">
+            <div class="glass-card p-4 md:p-6 group">
                 <div class="aspect-w-16 aspect-h-9 mb-4">
                     <div class="w-full h-48 bg-gradient-to-r from-green-900 to-black rounded-lg"></div>
                 </div>
                 <div class="space-y-2 mb-4">
                     <span class="tech-badge">{{ event.category }}</span>
                 </div>
-                <h3 class="text-xl font-bold mb-2">{{ event.title }}</h3>
-                <p class="text-gray-400 mb-4">{{ event.description[:100] }}...</p>
-                <div class="flex justify-between items-center">
+                <h3 class="text-lg md:text-xl font-bold mb-2">{{ event.title }}</h3>
+                <p class="text-sm md:text-base text-gray-400 mb-4">{{ event.description[:100] }}...</p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <span class="text-green-400 font-bold">₹{{ event.price }}</span>
-                    <a href="{{ url_for('book_event', event_id=event.id) }}" class="btn-primary">
+                    <a href="{{ url_for('book_event', event_id=event.id) }}" class="btn-primary w-full sm:w-auto text-center">
                         Register Now
                     </a>
                 </div>
@@ -163,48 +184,48 @@
 </section>
 
 <!-- Tech Categories Section -->
-<section id="tech-categories" class="py-20 bg-black bg-opacity-50">
-    <div class="container mx-auto">
-        <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Tech Categories</h2>
-        <div class="grid md:grid-cols-3 gap-8">
+<section id="tech-categories" class="py-12 md:py-20 bg-black bg-opacity-50">
+    <div class="container mx-auto px-4 sm:px-6">
+        <h2 class="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-center gradient-text">Tech Categories</h2>
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             <div class="stat-card">
                 <div class="text-4xl mb-4">🤖</div>
-                <h3 class="text-xl font-bold mb-2">Artificial Intelligence</h3>
-                <p class="text-gray-400">Explore machine learning, deep learning, and AI applications</p>
+                <h3 class="text-lg md:text-xl font-bold mb-2">Artificial Intelligence</h3>
+                <p class="text-sm md:text-base text-gray-400">Explore machine learning, deep learning, and AI applications</p>
             </div>
             <div class="stat-card">
                 <div class="text-4xl mb-4">🌐</div>
-                <h3 class="text-xl font-bold mb-2">Internet of Things</h3>
-                <p class="text-gray-400">Build and innovate with connected devices and sensors</p>
+                <h3 class="text-lg md:text-xl font-bold mb-2">Internet of Things</h3>
+                <p class="text-sm md:text-base text-gray-400">Build and innovate with connected devices and sensors</p>
             </div>
             <div class="stat-card">
                 <div class="text-4xl mb-4">🔒</div>
-                <h3 class="text-xl font-bold mb-2">Cybersecurity</h3>
-                <p class="text-gray-400">Learn about network security, ethical hacking, and protection</p>
+                <h3 class="text-lg md:text-xl font-bold mb-2">Cybersecurity</h3>
+                <p class="text-sm md:text-base text-gray-400">Learn about network security, ethical hacking, and protection</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Why Choose Us Section -->
-<section id="why-choose-us" class="py-20">
-    <div class="container mx-auto">
-        <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Why Choose Encypherist</h2>
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="glass-card p-6">
+<section id="why-choose-us" class="py-12 md:py-20">
+    <div class="container mx-auto px-4 sm:px-6">
+        <h2 class="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-center gradient-text">Why Choose Encypherist</h2>
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+            <div class="glass-card p-4 md:p-6">
                 <div class="text-4xl mb-4">🎓</div>
-                <h3 class="text-xl font-bold mb-2">Expert-Led Sessions</h3>
-                <p class="text-gray-400">Learn from industry professionals and tech experts</p>
+                <h3 class="text-lg md:text-xl font-bold mb-2">Expert-Led Sessions</h3>
+                <p class="text-sm md:text-base text-gray-400">Learn from industry professionals and tech experts</p>
             </div>
-            <div class="glass-card p-6">
+            <div class="glass-card p-4 md:p-6">
                 <div class="text-4xl mb-4">🤝</div>
-                <h3 class="text-xl font-bold mb-2">Networking</h3>
-                <p class="text-gray-400">Connect with like-minded tech enthusiasts</p>
+                <h3 class="text-lg md:text-xl font-bold mb-2">Networking</h3>
+                <p class="text-sm md:text-base text-gray-400">Connect with like-minded tech enthusiasts</p>
             </div>
-            <div class="glass-card p-6">
+            <div class="glass-card p-4 md:p-6">
                 <div class="text-4xl mb-4">💡</div>
-                <h3 class="text-xl font-bold mb-2">Innovation Hub</h3>
-                <p class="text-gray-400">Access to latest tech trends and resources</p>
+                <h3 class="text-lg md:text-xl font-bold mb-2">Innovation Hub</h3>
+                <p class="text-sm md:text-base text-gray-400">Access to latest tech trends and resources</p>
             </div>
         </div>
     </div>
