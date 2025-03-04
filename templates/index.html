@@ -210,32 +210,63 @@
     </div>
 </section>
 
-<!-- Featured Events Section -->
-<section id="featured" class="py-12 md:py-20">
-    <div class="container mx-auto px-4 sm:px-6">
-        <h2 class="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-center gradient-text">Featured Tech Events</h2>
-        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {% for event in featured_events %}
-            <div class="glass-card p-4 md:p-6 group">
-                <div class="aspect-w-16 aspect-h-9 mb-4">
-                    <div class="w-full h-48 bg-gradient-to-r from-green-900 to-black rounded-lg"></div>
+<!-- Announcements Section -->
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Announcements</h3>
                 </div>
-                <div class="space-y-2 mb-4">
-                    <span class="tech-badge">{{ event.category }}</span>
-                </div>
-                <h3 class="text-lg md:text-xl font-bold mb-2">{{ event.title }}</h3>
-                <p class="text-sm md:text-base text-gray-400 mb-4">{{ event.description[:100] }}...</p>
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <span class="text-green-400 font-bold">₹{{ event.price }}</span>
-                    <a href="{{ url_for('book_event', event_id=event.id) }}" class="btn-primary w-full sm:w-auto text-center">
-                        Register Now
-                    </a>
+                <div class="card-body">
+                    {% if announcements %}
+                        {% for announcement in announcements %}
+                            <div class="announcement-item mb-3">
+                                <h4>{{ announcement.title }}</h4>
+                                <p class="text-muted">Posted on {{ announcement.created_at.strftime('%B %d, %Y') }}</p>
+                                <div class="announcement-content">
+                                    {{ announcement.content }}
+                                </div>
+                                {% if announcement.image_url %}
+                                    <img src="{{ url_for('static', filename=announcement.image_url) }}" 
+                                         alt="Announcement image" 
+                                         class="img-fluid mt-2">
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No announcements at the moment.</p>
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
         </div>
     </div>
-</section>
+
+    <!-- Featured Events Section -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Featured Events</h2>
+        </div>
+        {% for event in featured_events %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text">{{ event.description[:100] }}...</p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> {{ event.date.strftime('%B %d, %Y') }}<br>
+                            <i class="fas fa-map-marker-alt"></i> {{ event.location }}<br>
+                            <i class="fas fa-ticket-alt"></i> ₹{{ "%.2f"|format(event.price) }}
+                        </small>
+                    </p>
+                    <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-primary">Learn More</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
 <!-- Tech Categories Section -->
 <section id="tech-categories" class="py-12 md:py-20 bg-black bg-opacity-50">
