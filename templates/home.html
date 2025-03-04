@@ -5,29 +5,31 @@
 {% block extra_head %}
 <style>
     .event-card {
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(15, 23, 42, 0.8);
         backdrop-filter: blur(20px);
         border: 1px solid var(--primary-color);
         border-radius: 1rem;
         transition: all 0.3s ease;
+        overflow: hidden;
     }
 
     .event-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
     }
 
     .filter-card {
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(15, 23, 42, 0.8);
         backdrop-filter: blur(20px);
         border: 1px solid var(--primary-color);
         border-radius: 1rem;
         position: sticky;
         top: 6rem;
+        margin-bottom: 2rem;
     }
 
     .category-tag {
-        background: rgba(0, 255, 0, 0.1);
+        background: rgba(96, 165, 250, 0.1);
         border: 1px solid var(--primary-color);
         color: var(--primary-color);
         padding: 0.25rem 0.75rem;
@@ -53,6 +55,39 @@
         color: var(--primary-color);
         font-size: 0.875rem;
     }
+
+    .input-field {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--primary-color);
+        border-radius: 0.5rem;
+        color: white;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .filter-card {
+            position: relative;
+            top: 0;
+            margin-bottom: 2rem;
+        }
+
+        .event-card {
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            gap: 1rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -60,19 +95,19 @@
 <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
     <!-- Filters -->
     <div class="md:col-span-1">
-        <div class="filter-card p-6">
-            <h2 class="text-xl font-bold mb-6 gradient-text">Filters</h2>
-            <form action="{{ url_for('home') }}" method="GET" class="space-y-6">
+        <div class="filter-card p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 gradient-text">Filters</h2>
+            <form action="{{ url_for('home') }}" method="GET" class="space-y-4 sm:space-y-6">
                 <!-- Search -->
                 <div>
-                    <label class="block mb-2">Search</label>
+                    <label class="block mb-2 text-sm sm:text-base">Search</label>
                     <input type="text" name="search" value="{{ search_query }}" 
                            class="input-field" placeholder="Search events...">
                 </div>
 
                 <!-- Category -->
                 <div>
-                    <label class="block mb-2">Category</label>
+                    <label class="block mb-2 text-sm sm:text-base">Category</label>
                     <select name="category" class="input-field">
                         <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Categories</option>
                         {% for category in categories %}
@@ -85,8 +120,8 @@
 
                 <!-- Price Range -->
                 <div>
-                    <label class="block mb-2">Price Range</label>
-                    <div class="grid grid-cols-2 gap-4">
+                    <label class="block mb-2 text-sm sm:text-base">Price Range</label>
+                    <div class="grid grid-cols-2 gap-2 sm:gap-4">
                         <input type="number" name="min_price" value="{{ min_price }}" 
                                class="input-field" placeholder="Min">
                         <input type="number" name="max_price" value="{{ max_price }}" 
@@ -96,7 +131,7 @@
 
                 <!-- Date Range -->
                 <div>
-                    <label class="block mb-2">Date Range</label>
+                    <label class="block mb-2 text-sm sm:text-base">Date Range</label>
                     <input type="date" name="start_date" value="{{ start_date }}" 
                            class="input-field mb-2">
                     <input type="date" name="end_date" value="{{ end_date }}" 
@@ -105,7 +140,7 @@
 
                 <!-- Sort -->
                 <div>
-                    <label class="block mb-2">Sort By</label>
+                    <label class="block mb-2 text-sm sm:text-base">Sort By</label>
                     <select name="sort" class="input-field">
                         <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Date</option>
                         <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price</option>
@@ -113,7 +148,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn-primary w-full">Apply Filters</button>
+                <button type="submit" class="btn-primary w-full text-sm sm:text-base">Apply Filters</button>
             </form>
         </div>
     </div>
@@ -121,23 +156,23 @@
     <!-- Events Grid -->
     <div class="md:col-span-3">
         {% if events %}
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {% for event in events %}
             <div class="event-card">
                 <div class="aspect-w-16 aspect-h-9">
-                    <div class="w-full h-48 bg-gradient-to-r from-green-900 to-black rounded-t-lg"></div>
+                    <div class="w-full h-48 bg-gradient-to-r from-blue-900 to-black rounded-t-lg"></div>
                 </div>
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-4">
+                <div class="p-4 sm:p-6">
+                    <div class="flex justify-between items-start mb-3 sm:mb-4">
                         <span class="category-tag">{{ event.category }}</span>
                         <span class="price-badge">₹{{ event.price }}</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">{{ event.title }}</h3>
-                    <p class="text-gray-400 mb-4">{{ event.description[:100] }}...</p>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2">{{ event.title }}</h3>
+                    <p class="text-gray-400 text-sm sm:text-base mb-3 sm:mb-4">{{ event.description[:100] }}...</p>
                     <div class="flex items-center justify-between">
-                        <div class="text-sm">
+                        <div class="text-xs sm:text-sm">
                             <div class="text-gray-400 mb-1">
-                                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-3 h-3 sm:w-4 sm:h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -148,16 +183,16 @@
                             </div>
                         </div>
                         <a href="{{ url_for('book_event', event_id=event.id) }}" 
-                           class="btn-primary">Book Now</a>
+                           class="btn-primary text-sm sm:text-base">Book Now</a>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <div class="text-center py-12">
-            <h3 class="text-2xl font-bold mb-4">No Events Found</h3>
-            <p class="text-gray-400">Try adjusting your filters or check back later for new events.</p>
+        <div class="text-center py-8 sm:py-12">
+            <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">No Events Found</h3>
+            <p class="text-gray-400 text-sm sm:text-base">Try adjusting your filters or check back later for new events.</p>
         </div>
         {% endif %}
     </div>
