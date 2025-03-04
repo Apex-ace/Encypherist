@@ -5,19 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %} - Encypherist</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #00FF00;
-            --secondary-color: #000000;
-            --accent-color: #1a1a1a;
-            --text-color: #FFFFFF;
-            --background-color: #0a0a0a;
+            --primary-color: #60A5FA;
+            --secondary-color: #1E40AF;
+            --accent-color: #2563EB;
+            --text-color: #F3F4F6;
+            --bg-color: #0F172A;
+            --baby-blue: #93C5FD;
+            --light-blue: #BFDBFE;
         }
 
         body {
-            font-family: 'Space Grotesk', sans-serif;
-            background-color: var(--background-color);
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--bg-color), #1E293B);
             color: var(--text-color);
             min-height: 100vh;
             display: flex;
@@ -25,44 +27,80 @@
         }
 
         .navbar {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--primary-color);
         }
 
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 80%;
+            max-width: 300px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+            border-left: 1px solid var(--primary-color);
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
+            display: block;
+        }
+
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 999;
+        }
+
+        .mobile-menu-overlay.active {
+            display: block;
+        }
+
         .btn-primary {
-            background: var(--primary-color);
-            color: var(--secondary-color);
-            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 0.75rem;
             transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
-            background: #00CC00;
             transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
         }
 
         .btn-secondary {
-            background: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.1);
             border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            font-weight: bold;
+            color: white;
+            font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 0.75rem;
             transition: all 0.3s ease;
         }
 
         .btn-secondary:hover {
-            background: rgba(0, 255, 0, 0.1);
+            background: rgba(96, 165, 250, 0.1);
             transform: translateY(-2px);
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(96, 165, 250, 0.2);
         }
 
         .card {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
             border: 1px solid var(--primary-color);
             border-radius: 1rem;
@@ -73,11 +111,11 @@
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
         }
 
         .input-field {
-            background-color: rgba(0, 0, 0, 0.6);
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--primary-color);
             color: var(--text-color);
             padding: 0.75rem;
@@ -88,12 +126,12 @@
 
         .input-field:focus {
             outline: none;
-            box-shadow: 0 0 0 2px var(--primary-color);
-            transform: translateY(-1px);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
         }
 
         .gradient-text {
-            background: linear-gradient(to right, #00FF00, #00CC00);
+            background: linear-gradient(45deg, var(--primary-color), var(--baby-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -103,23 +141,62 @@
             transition: all 0.3s ease;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
         }
 
         .nav-link:hover {
             color: var(--primary-color);
-            background: rgba(0, 255, 0, 0.1);
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .alert {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--primary-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
+        .alert-error {
+            border-color: #f87171;
+            color: #f87171;
+        }
+
+        @media (max-width: 768px) {
+            .desktop-menu {
+                display: none;
+            }
+            
+            .mobile-menu-button {
+                display: block;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-menu-button {
+                display: none;
+            }
         }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <nav class="navbar fixed w-full z-50">
-        <div class="container mx-auto px-6 py-4">
+        <div class="container mx-auto px-4 sm:px-6 py-4">
             <div class="flex justify-between items-center">
-                <a href="{{ url_for('landing') }}" class="text-3xl font-bold gradient-text">
+                <a href="{{ url_for('landing') }}" class="text-xl sm:text-2xl font-bold gradient-text">
                     Encypherist
                 </a>
-                <div class="flex items-center space-x-6">
+                
+                <!-- Desktop Menu -->
+                <div class="desktop-menu flex items-center space-x-4 sm:space-x-6">
                     {% if current_user.is_authenticated %}
                         <a href="{{ url_for('home') }}" class="nav-link">Home</a>
                         {% if current_user.role == 'organizer' %}
@@ -140,30 +217,70 @@
                         <a href="{{ url_for('register') }}" class="btn-primary">Register</a>
                     {% endif %}
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-button text-white p-2" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </nav>
 
-    <main class="flex-grow container mx-auto px-6 py-24">
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
+    <div class="mobile-menu">
+        <div class="flex justify-between items-center mb-8">
+            <a href="{{ url_for('landing') }}" class="text-xl font-bold gradient-text">
+                Encypherist
+            </a>
+            <button onclick="toggleMobileMenu()" class="text-white p-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+            {% if current_user.role == 'organizer' %}
+                <a href="{{ url_for('create_event') }}" class="nav-link">Create Event</a>
+            {% endif %}
+            <a href="{{ url_for('messages') }}" class="nav-link">Messages</a>
+            <a href="{{ url_for('notifications') }}" class="nav-link">Notifications</a>
+            <a href="{{ url_for('profile') }}" class="nav-link">Profile</a>
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Admin</a>
+            {% endif %}
+            <form action="{{ url_for('logout') }}" method="post" class="mt-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-secondary w-full">Logout</button>
+            </form>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+            <a href="{{ url_for('register') }}" class="nav-link">Register</a>
+        {% endif %}
+    </div>
+
+    <main class="flex-grow container mx-auto px-4 sm:px-6 pt-20 sm:pt-24">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert mb-6 p-4 rounded-lg {% if category == 'success' %}bg-green-500{% else %}bg-red-500{% endif %} text-white">
+                    <div class="alert {% if category == 'success' %}alert-success{% else %}alert-error{% endif %}">
                         {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
-
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="navbar mt-auto">
-        <div class="container mx-auto px-6 py-4 text-center">
-            <p class="gradient-text">&copy; {{ now.year }} Encypherist. All rights reserved.</p>
-        </div>
-    </footer>
-
-    {% block scripts %}{% endblock %}
+    <script>
+        function toggleMobileMenu() {
+            document.querySelector('.mobile-menu').classList.toggle('active');
+            document.querySelector('.mobile-menu-overlay').classList.toggle('active');
+        }
+    </script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
