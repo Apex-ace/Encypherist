@@ -8,16 +8,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #00FF00;
-            --primary-dark: #00CC00;
-            --secondary-color: #000000;
-            --accent-color: #1a1a1a;
-            --text-color: #ffffff;
+            --primary-color: #60A5FA;
+            --secondary-color: #1E40AF;
+            --accent-color: #2563EB;
+            --text-color: #FFFFFF;
+            --background-color: #0F172A;
+            --baby-blue: #93C5FD;
+            --light-blue: #BFDBFE;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: var(--secondary-color);
+            background-color: var(--background-color);
             color: var(--text-color);
             min-height: 100vh;
             margin: 0;
@@ -26,22 +28,22 @@
         }
 
         .glass {
-            background: rgba(0, 255, 0, 0.05);
+            background: rgba(147, 197, 253, 0.05);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 0, 0.1);
+            border: 1px solid var(--primary-color);
             border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 255, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(147, 197, 253, 0.1);
         }
 
         .gradient-text {
-            background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+            background: linear-gradient(45deg, var(--primary-color), var(--baby-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .input-field {
-            background: rgba(0, 255, 0, 0.05);
-            border: 1px solid rgba(0, 255, 0, 0.1);
+            background: rgba(147, 197, 253, 0.05);
+            border: 1px solid var(--primary-color);
             border-radius: 12px;
             padding: 1rem;
             width: 100%;
@@ -50,12 +52,12 @@
         }
 
         .input-field::placeholder {
-            color: rgba(0, 255, 0, 0.5);
+            color: rgba(147, 197, 253, 0.5);
         }
 
         .input-field:focus {
-            border-color: rgba(0, 255, 0, 0.5);
-            box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.25);
+            border-color: var(--baby-blue);
+            box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.25);
             outline: none;
         }
 
@@ -77,26 +79,26 @@
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
-            border: none;
-            border-radius: 12px;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            font-weight: bold;
             padding: 1rem;
-            color: black;
-            font-weight: 600;
+            border-radius: 12px;
             width: 100%;
             transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
+            background: var(--baby-blue);
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.4);
+            box-shadow: 0 4px 20px rgba(147, 197, 253, 0.4);
         }
 
         .image-preview {
             width: 100%;
             height: 200px;
             border-radius: 12px;
-            border: 2px dashed rgba(0, 255, 0, 0.1);
+            border: 2px dashed var(--primary-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -107,7 +109,7 @@
         }
 
         .image-preview:hover {
-            border-color: rgba(0, 255, 0, 0.5);
+            border-color: var(--baby-blue);
         }
 
         .image-preview img {
@@ -133,7 +135,7 @@
             width: 48px;
             height: 48px;
             margin-bottom: 1rem;
-            color: rgba(0, 255, 0, 0.5);
+            color: var(--baby-blue);
         }
 
         .toggle-switch {
@@ -156,7 +158,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 255, 0, 0.1);
+            background: rgba(147, 197, 253, 0.1);
             transition: .4s;
             border-radius: 34px;
         }
@@ -174,7 +176,7 @@
         }
 
         input:checked + .toggle-slider {
-            background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+            background: var(--primary-color);
         }
 
         input:checked + .toggle-slider:before {
@@ -195,9 +197,9 @@
             transform: translateY(0);
             padding: 1rem;
             margin-top: 1rem;
-            background: rgba(0, 255, 0, 0.05);
+            background: rgba(147, 197, 253, 0.05);
             border-radius: 12px;
-            border: 1px solid rgba(0, 255, 0, 0.1);
+            border: 1px solid var(--primary-color);
         }
     </style>
 </head>
@@ -205,52 +207,52 @@
     <nav class="fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <a href="{{ url_for('home') }}" class="text-2xl font-bold gradient-text">Encypherist</a>
-                <a href="{{ url_for('home') }}" class="text-sm text-green-400 hover:text-green-300 transition-colors">← Back to Events</a>
+                <a href="{{ url_for('home') }}" class="text-xl sm:text-2xl font-bold gradient-text">Encypherist</a>
+                <a href="{{ url_for('home') }}" class="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition-colors">← Back to Events</a>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-        <div class="glass p-8">
-            <h2 class="text-3xl font-bold mb-8 text-center gradient-text">Create New Event</h2>
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8 sm:pb-12">
+        <div class="glass p-4 sm:p-8">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center gradient-text">Create New Event</h2>
 
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="mb-6 p-4 rounded-lg bg-green-500 bg-opacity-20 text-green-200 text-center">
+                        <div class="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg bg-blue-500 bg-opacity-20 text-blue-200 text-center text-sm">
                             {{ message }}
                         </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
 
-            <form method="POST" action="{{ url_for('create_event') }}" enctype="multipart/form-data" class="space-y-6">
+            <form method="POST" action="{{ url_for('create_event') }}" enctype="multipart/form-data" class="space-y-4 sm:space-y-6">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <div>
-                    <label class="block text-sm font-medium text-green-400 mb-2">Event Image</label>
-                    <div class="image-preview" id="imagePreview">
+                    <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Event Image</label>
+                    <div class="image-preview h-32 sm:h-48" id="imagePreview">
                         <div class="upload-prompt">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-green-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 text-blue-400">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <p class="text-green-400">Click to upload event image</p>
-                            <p class="text-sm text-green-500">Recommended size: 800x600px</p>
+                            <p class="text-xs sm:text-sm text-blue-400">Click to upload event image</p>
+                            <p class="text-xs text-blue-500">Recommended size: 800x600px</p>
                         </div>
-                        <img id="previewImg" src="#" alt="Preview">
+                        <img id="previewImg" src="#" alt="Preview" class="w-full h-full object-cover">
                     </div>
                     <input type="file" name="image" id="imageInput" accept="image/*" class="hidden">
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-green-400 mb-2">Event Title</label>
-                        <input type="text" name="title" required class="input-field" placeholder="Enter event title">
+                        <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Event Title</label>
+                        <input type="text" name="title" required class="input-field text-sm sm:text-base" placeholder="Enter event title">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-green-400 mb-2">Category</label>
-                        <select name="category" required class="input-field">
+                        <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Category</label>
+                        <select name="category" required class="input-field text-sm sm:text-base">
                             <option value="">Select Category</option>
                             <option value="Workshop">Workshop</option>
                             <option value="Seminar">Seminar</option>
@@ -263,40 +265,40 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-green-400 mb-2">Description</label>
-                    <textarea name="description" required class="input-field h-32" placeholder="Enter event description"></textarea>
+                    <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Description</label>
+                    <textarea name="description" required class="input-field h-24 sm:h-32 text-sm sm:text-base" placeholder="Enter event description"></textarea>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-green-400 mb-2">Date</label>
-                        <input type="date" name="date" required class="input-field">
+                        <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Date</label>
+                        <input type="date" name="date" required class="input-field text-sm sm:text-base">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-green-400 mb-2">Time</label>
-                        <input type="time" name="time" required class="input-field">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-green-400 mb-2">Venue</label>
-                        <input type="text" name="venue" required class="input-field" placeholder="Enter venue">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-green-400 mb-2">Price (₹)</label>
-                        <input type="number" name="price" required class="input-field" placeholder="Enter price" min="0" step="0.01">
+                        <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Time</label>
+                        <input type="time" name="time" required class="input-field text-sm sm:text-base">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-green-400 mb-2">Total Tickets</label>
-                        <input type="number" name="total_tickets" required class="input-field" placeholder="Enter total tickets" min="1">
+                        <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Venue</label>
+                        <input type="text" name="venue" required class="input-field text-sm sm:text-base" placeholder="Enter venue">
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Price (₹)</label>
+                        <input type="number" name="price" required class="input-field text-sm sm:text-base" placeholder="Enter price" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Total Tickets</label>
+                        <input type="number" name="total_tickets" required class="input-field text-sm sm:text-base" placeholder="Enter total tickets" min="1">
                     </div>
                     <div>
                         <label class="flex items-center space-x-3">
-                            <span class="text-sm font-medium text-green-400">Enable Group Booking</span>
+                            <span class="text-xs sm:text-sm font-medium text-blue-400">Enable Group Booking</span>
                             <div class="toggle-switch">
                                 <input type="checkbox" id="groupBooking" name="group_booking">
                                 <span class="toggle-slider"></span>
@@ -306,38 +308,38 @@
                 </div>
 
                 <div id="groupSettings" class="group-settings">
-                    <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-green-400 mb-2">Min Group Size</label>
-                            <input type="number" name="min_group_size" class="input-field" placeholder="Enter minimum group size" min="2">
+                            <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Min Group Size</label>
+                            <input type="number" name="min_group_size" class="input-field text-sm sm:text-base" placeholder="Enter minimum group size" min="2">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-green-400 mb-2">Max Group Size</label>
-                            <input type="number" name="max_group_size" class="input-field" placeholder="Enter maximum group size" min="2">
+                            <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Max Group Size</label>
+                            <input type="number" name="max_group_size" class="input-field text-sm sm:text-base" placeholder="Enter maximum group size" min="2">
                         </div>
                     </div>
                     <div class="mt-4">
-                        <label class="block text-sm font-medium text-green-400 mb-2">Group Discount (%)</label>
-                        <input type="number" name="group_discount" class="input-field" placeholder="Enter group discount percentage" min="0" max="100" step="0.01">
+                        <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Group Discount (%)</label>
+                        <input type="number" name="group_discount" class="input-field text-sm sm:text-base" placeholder="Enter group discount percentage" min="0" max="100" step="0.01">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-green-400 mb-2">Payment QR Code</label>
-                    <div class="image-preview" id="qrPreview">
+                    <label class="block text-xs sm:text-sm font-medium text-blue-400 mb-2">Payment QR Code</label>
+                    <div class="image-preview h-32 sm:h-48" id="qrPreview">
                         <div class="upload-prompt">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-green-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 text-blue-400">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v-4m6 0h-2m2 0v4m-6-4h.01M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                             </svg>
-                            <p class="text-green-400">Click to upload payment QR code</p>
-                            <p class="text-sm text-green-500">Recommended format: PNG or JPG</p>
+                            <p class="text-xs sm:text-sm text-blue-400">Click to upload payment QR code</p>
+                            <p class="text-xs text-blue-500">Recommended format: PNG or JPG</p>
                         </div>
-                        <img id="qrPreviewImg" src="#" alt="QR Preview">
+                        <img id="qrPreviewImg" src="#" alt="QR Preview" class="w-full h-full object-contain">
                     </div>
                     <input type="file" name="payment_qr_file" id="qrInput" accept="image/*" class="hidden">
                 </div>
 
-                <button type="submit" class="btn-primary">Create Event</button>
+                <button type="submit" class="btn-primary text-sm sm:text-base">Create Event</button>
             </form>
         </div>
     </main>
