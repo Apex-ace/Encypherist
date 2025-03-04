@@ -1943,6 +1943,16 @@ def book_group(event_id):
                          max_size=max_size,
                          discount=discount)
 
+# Add this route after your other routes
+@app.route('/event/<int:event_id>')
+def event_details(event_id):
+    try:
+        event = Event.query.get_or_404(event_id)
+        return render_template('event_details.html', event=event)
+    except Exception as e:
+        flash('Error loading event details')
+        return redirect(url_for('home'))
+
 # Create views
 def create_views():
     with app.app_context():
