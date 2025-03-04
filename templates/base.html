@@ -97,6 +97,7 @@
             transition: transform 0.3s ease-in-out;
             z-index: 1000;
             border-left: 1px solid var(--primary-color);
+            overflow-y: auto;
         }
 
         .mobile-menu.active {
@@ -113,6 +114,7 @@
             bottom: 0;
             background: rgba(15, 23, 42, 0.5);
             z-index: 999;
+            backdrop-filter: blur(4px);
         }
 
         .mobile-menu-overlay.active {
@@ -189,15 +191,17 @@
         .nav-link {
             color: var(--text-color);
             transition: all 0.3s ease;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1rem;
             border-radius: 0.5rem;
             display: block;
             margin-bottom: 0.5rem;
+            font-size: 1rem;
         }
 
         .nav-link:hover {
             color: var(--primary-color);
             background: rgba(96, 165, 250, 0.1);
+            transform: translateX(5px);
         }
 
         .alert {
@@ -219,19 +223,25 @@
             color: #f87171;
         }
 
+        .mobile-menu .btn-secondary {
+            width: 100%;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
-            .desktop-menu {
-                display: none;
+            .navbar {
+                padding: 0.75rem 1rem;
             }
             
-            .mobile-menu-button {
-                display: block;
+            .mobile-menu {
+                width: 85%;
             }
         }
 
         @media (min-width: 769px) {
-            .mobile-menu-button {
-                display: none;
+            .mobile-menu {
+                width: 300px;
             }
         }
     </style>
@@ -251,31 +261,8 @@
                     Encypherist
                 </a>
                 
-                <!-- Desktop Menu -->
-                <div class="desktop-menu flex items-center space-x-4 sm:space-x-6">
-                    {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('home') }}" class="nav-link">Home</a>
-                        {% if current_user.role == 'organizer' %}
-                            <a href="{{ url_for('create_event') }}" class="nav-link">Create Event</a>
-                        {% endif %}
-                        <a href="{{ url_for('messages') }}" class="nav-link">Messages</a>
-                        <a href="{{ url_for('notifications') }}" class="nav-link">Notifications</a>
-                        <a href="{{ url_for('profile') }}" class="nav-link">Profile</a>
-                        {% if current_user.role == 'admin' %}
-                            <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Admin</a>
-                        {% endif %}
-                        <form action="{{ url_for('logout') }}" method="post" class="inline">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn-secondary">Logout</button>
-                        </form>
-                    {% else %}
-                        <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
-                        <a href="{{ url_for('register') }}" class="btn-primary">Register</a>
-                    {% endif %}
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <button class="mobile-menu-button text-white p-2" onclick="toggleMobileMenu()">
+                <!-- Hamburger Menu Button -->
+                <button class="text-white p-2" onclick="toggleMobileMenu()">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
