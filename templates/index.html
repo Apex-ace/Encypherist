@@ -153,6 +153,85 @@
             height: 300px;
         }
     }
+
+    /* Solar System Animation */
+    .solar-system {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 200px;
+        height: 200px;
+    }
+
+    .sun {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        background: #FFD700;
+        border-radius: 50%;
+        box-shadow: 0 0 20px #FFD700;
+        transform: translate(-50%, -50%);
+    }
+
+    .orbit {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .planet {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 8px;
+        height: 8px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: orbit linear infinite;
+    }
+
+    .orbit:nth-child(2) { width: 60px; height: 60px; }
+    .orbit:nth-child(3) { width: 100px; height: 100px; }
+    .orbit:nth-child(4) { width: 140px; height: 140px; }
+
+    .planet:nth-child(1) { animation-duration: 3s; }
+    .planet:nth-child(2) { animation-duration: 5s; }
+    .planet:nth-child(3) { animation-duration: 7s; }
+
+    @keyframes orbit {
+        from { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+        to { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+    }
+
+    /* Computer Line Drawing Animation */
+    .computer-drawing {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        width: 300px;
+        height: 200px;
+    }
+
+    .computer-line {
+        stroke: var(--primary-color);
+        stroke-width: 2;
+        fill: none;
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        animation: drawLine 3s ease forwards infinite;
+    }
+
+    @keyframes drawLine {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -315,6 +394,34 @@
         </div>
     </div>
 </section>
+
+<!-- Add this where you want the solar system to appear -->
+<div class="solar-system">
+    <div class="sun"></div>
+    <div class="orbit">
+        <div class="planet"></div>
+    </div>
+    <div class="orbit">
+        <div class="planet"></div>
+    </div>
+    <div class="orbit">
+        <div class="planet"></div>
+    </div>
+</div>
+
+<!-- Add this where you want the computer drawing to appear -->
+<div class="computer-drawing">
+    <svg viewBox="0 0 300 200">
+        <!-- Monitor -->
+        <path class="computer-line" d="M50,50 L250,50 L250,150 L50,150 Z"/>
+        <!-- Screen -->
+        <path class="computer-line" d="M70,70 L230,70 L230,130 L70,130 Z"/>
+        <!-- Stand -->
+        <path class="computer-line" d="M120,150 L180,150 L200,180 L100,180 Z"/>
+        <!-- Keyboard -->
+        <path class="computer-line" d="M80,160 L220,160 L230,170 L70,170 Z"/>
+    </svg>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -341,4 +448,50 @@
         lineOpacity: 0.2
     })
 </script>
+
+<!-- Add this script at the end of your body -->
+<script>
+    // Optional: Add interactive elements
+    document.querySelector('.solar-system').addEventListener('mouseover', function() {
+        this.style.transform = 'scale(1.1)';
+    });
+
+    document.querySelector('.solar-system').addEventListener('mouseout', function() {
+        this.style.transform = 'scale(1)';
+    });
+
+    // Add random twinkling stars
+    function createStars() {
+        const starsContainer = document.createElement('div');
+        starsContainer.style.position = 'fixed';
+        starsContainer.style.top = '0';
+        starsContainer.style.left = '0';
+        starsContainer.style.width = '100%';
+        starsContainer.style.height = '100%';
+        starsContainer.style.zIndex = '-1';
+        document.body.appendChild(starsContainer);
+
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.style.position = 'absolute';
+            star.style.width = '2px';
+            star.style.height = '2px';
+            star.style.backgroundColor = '#FFF';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animation = `twinkle ${Math.random() * 3 + 1}s infinite`;
+            starsContainer.appendChild(star);
+        }
+    }
+
+    createStars();
+</script>
+
+<style>
+    @keyframes twinkle {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+</style>
 {% endblock %}
