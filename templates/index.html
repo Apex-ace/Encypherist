@@ -59,6 +59,33 @@
         border-color: var(--primary-color);
         box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
     }
+
+    .tech-badge {
+        background: rgba(0, 255, 0, 0.1);
+        border: 1px solid var(--primary-color);
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        color: var(--primary-color);
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .gradient-border {
+        position: relative;
+        border-radius: 24px;
+        padding: 1px;
+        background: linear-gradient(45deg, #00ff00, #00ffff, #00ff00);
+        background-size: 200% 200%;
+        animation: gradient 5s ease infinite;
+    }
+
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
 </style>
 {% endblock %}
 
@@ -70,19 +97,25 @@
     <div class="container mx-auto">
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div class="space-y-8">
+                <div class="space-y-4">
+                    <span class="tech-badge">AI</span>
+                    <span class="tech-badge">IoT</span>
+                    <span class="tech-badge">Cybersecurity</span>
+                </div>
                 <h1 class="text-6xl md:text-7xl font-extrabold leading-tight">
-                    Experience
-                    <span class="gradient-text block">Events</span>
-                    Like Never Before
+                    Innovate
+                    <span class="gradient-text block">Tech Events</span>
+                    For Tomorrow
                 </h1>
                 <p class="text-xl text-gray-400 leading-relaxed">
-                    ncypherist is a community dedicated to fostering students' skills in computer science, artificial intelligence (AI), and machine learning (ML). As the president of Encypherist, you lead initiatives that promote learning, collaboration, and innovation in these fields.
+                    Encypherist is your gateway to cutting-edge tech events. From AI workshops to IoT hackathons and cybersecurity challenges, join us in shaping the future of technology. Connect with industry experts, collaborate with peers, and transform your ideas into reality.
+                </p>
                 <div class="flex flex-wrap gap-6">
                     <a href="{{ url_for('home') }}" class="btn-primary">
-                        Explore Events
+                        Explore Tech Events
                     </a>
                     <a href="{{ url_for('register') }}?role=organizer" class="btn-secondary">
-                        Create Event
+                        Host an Event
                     </a>
                 </div>
             </div>
@@ -105,19 +138,22 @@
 <!-- Featured Events Section -->
 <section id="featured" class="py-20">
     <div class="container mx-auto">
-        <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Featured Events</h2>
+        <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Featured Tech Events</h2>
         <div class="grid md:grid-cols-3 gap-8">
             {% for event in featured_events %}
             <div class="glass-card p-6 group">
                 <div class="aspect-w-16 aspect-h-9 mb-4">
                     <div class="w-full h-48 bg-gradient-to-r from-green-900 to-black rounded-lg"></div>
                 </div>
+                <div class="space-y-2 mb-4">
+                    <span class="tech-badge">{{ event.category }}</span>
+                </div>
                 <h3 class="text-xl font-bold mb-2">{{ event.title }}</h3>
                 <p class="text-gray-400 mb-4">{{ event.description[:100] }}...</p>
                 <div class="flex justify-between items-center">
                     <span class="text-green-400 font-bold">₹{{ event.price }}</span>
                     <a href="{{ url_for('book_event', event_id=event.id) }}" class="btn-primary">
-                        Book Now
+                        Register Now
                     </a>
                 </div>
             </div>
@@ -126,25 +162,49 @@
     </div>
 </section>
 
-<!-- How It Works Section -->
-<section id="how-it-works" class="py-20 bg-black bg-opacity-50">
+<!-- Tech Categories Section -->
+<section id="tech-categories" class="py-20 bg-black bg-opacity-50">
     <div class="container mx-auto">
-        <h2 class="text-4xl font-bold mb-12 text-center gradient-text">How It Works</h2>
+        <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Tech Categories</h2>
         <div class="grid md:grid-cols-3 gap-8">
             <div class="stat-card">
-                <div class="text-4xl mb-4">🎫</div>
-                <h3 class="text-xl font-bold mb-2">Browse Events</h3>
-                <p class="text-gray-400">Discover exciting events happening in your college</p>
+                <div class="text-4xl mb-4">🤖</div>
+                <h3 class="text-xl font-bold mb-2">Artificial Intelligence</h3>
+                <p class="text-gray-400">Explore machine learning, deep learning, and AI applications</p>
             </div>
             <div class="stat-card">
-                <div class="text-4xl mb-4">📱</div>
-                <h3 class="text-xl font-bold mb-2">Book Instantly</h3>
-                <p class="text-gray-400">Secure your tickets with just a few clicks</p>
+                <div class="text-4xl mb-4">🌐</div>
+                <h3 class="text-xl font-bold mb-2">Internet of Things</h3>
+                <p class="text-gray-400">Build and innovate with connected devices and sensors</p>
             </div>
             <div class="stat-card">
-                <div class="text-4xl mb-4">🎉</div>
-                <h3 class="text-xl font-bold mb-2">Enjoy Events</h3>
-                <p class="text-gray-400">Attend events and create lasting memories</p>
+                <div class="text-4xl mb-4">🔒</div>
+                <h3 class="text-xl font-bold mb-2">Cybersecurity</h3>
+                <p class="text-gray-400">Learn about network security, ethical hacking, and protection</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section id="why-choose-us" class="py-20">
+    <div class="container mx-auto">
+        <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Why Choose Encypherist</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="glass-card p-6">
+                <div class="text-4xl mb-4">🎓</div>
+                <h3 class="text-xl font-bold mb-2">Expert-Led Sessions</h3>
+                <p class="text-gray-400">Learn from industry professionals and tech experts</p>
+            </div>
+            <div class="glass-card p-6">
+                <div class="text-4xl mb-4">🤝</div>
+                <h3 class="text-xl font-bold mb-2">Networking</h3>
+                <p class="text-gray-400">Connect with like-minded tech enthusiasts</p>
+            </div>
+            <div class="glass-card p-6">
+                <div class="text-4xl mb-4">💡</div>
+                <h3 class="text-xl font-bold mb-2">Innovation Hub</h3>
+                <p class="text-gray-400">Access to latest tech trends and resources</p>
             </div>
         </div>
     </div>
@@ -162,11 +222,17 @@
         minWidth: 200.00,
         scale: 1.00,
         scaleMobile: 1.00,
-        color: 0x00ff00,
+        color: 0x4a4a4a,
         backgroundColor: 0x0a0a0a,
-        points: 15.00,
-        maxDistance: 25.00,
-        spacing: 17.00
+        points: 8.00,
+        maxDistance: 15.00,
+        spacing: 25.00,
+        showDots: false,
+        lineColor: 0x2a2a2a,
+        lineWidth: 1.00,
+        lineDistance: 150.00,
+        lineRadius: 5.00,
+        lineOpacity: 0.2
     })
 </script>
 {% endblock %}
