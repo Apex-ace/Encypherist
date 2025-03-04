@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encypherist - Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00FF00;
+            --secondary-color: #000000;
+            --accent-color: #1a1a1a;
+            --text-color: #FFFFFF;
+            --background-color: #0a0a0a;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: 
+                radial-gradient(circle at 85% 50%, rgba(0, 255, 0, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 15% 30%, rgba(0, 200, 0, 0.1) 0%, transparent 25%);
+            animation: bgAnimation 15s ease infinite alternate;
+        }
+
+        @keyframes bgAnimation {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+            100% {
+                transform: scale(1.2) rotate(-5deg);
+            }
+        }
+
+        .glass {
+            background: rgba(0, 255, 0, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-color);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 255, 0, 0.1);
+        }
+
+        .input-field {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.25);
+            outline: none;
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, var(--primary-color), #00CC00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--secondary-color);
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #00CC00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.4);
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .role-option {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-option:hover {
+            background: rgba(0, 255, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .role-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(0, 255, 0, 0.15);
+        }
+
+        .role-option svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin: 0 auto 1rem;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    
+    <div class="min-h-screen flex flex-col items-center justify-center relative z-10 px-4">
+        <nav class="w-full flex justify-between items-center py-4 px-6 fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-20">
+            <a href="{{ url_for('landing') }}" class="text-2xl font-bold" style="color: var(--primary-color)">Encypherist</a>
+            <a href="{{ url_for('landing') }}" class="text-sm text-gray-300 hover:text-green-400 transition-colors">← Back to Home</a>
+        </nav>
+
+        <div class="glass w-full max-w-md">
+            <h2 class="text-3xl font-bold mb-6 text-center gradient-text">Create Account</h2>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-lg bg-red-500 bg-opacity-20 text-red-200 text-center text-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('register') }}" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="role-selector">
+                    <label class="role-option" onclick="selectRole('student')">
+                        <input type="radio" name="role" value="student" class="hidden" required>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"/>
+                        </svg>
+                        <h3 class="text-lg font-semibold mb-2">Student</h3>
+                        <p class="text-sm text-gray-400">Book and attend events</p>
+                    </label>
+                    
+                    <label class="role-option" onclick="selectRole('organizer')">
+                        <input type="radio" name="role" value="organizer" class="hidden" required>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <h3 class="text-lg font-semibold mb-2">Organizer</h3>
+                        <p class="text-sm text-gray-400">Create and manage events</p>
+                    </label>
+                </div>
+
+                <div>
+                    <input type="text" id="username" name="username" required
+                           class="input-field"
+                           placeholder="Choose a username">
+                </div>
+                
+                <div>
+                    <input type="password" id="password" name="password" required
+                           class="input-field"
+                           placeholder="Create a password">
+                    <p class="text-xs text-gray-400 mt-1">Password must be at least 6 characters long</p>
+                </div>
+
+                <button type="submit" class="btn-primary mt-6">
+                    Create Account
+                </button>
+            </form>
+
+            <p class="mt-8 text-center text-gray-400">
+                Already have an account? 
+                <a href="{{ url_for('login') }}" class="text-green-400 hover:text-green-300">Login here</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function selectRole(role) {
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            const selectedOption = document.querySelector(`.role-option input[value="${role}"]`).parentElement;
+            selectedOption.classList.add('selected');
+        }
+    </script>
+</body>
+</html>
+
