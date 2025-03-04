@@ -13,7 +13,55 @@
         left: 0;
         width: 100%;
         height: 100%;
+        z-index: -2;
+    }
+
+    .moving-lines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
         z-index: -1;
+    }
+
+    .line {
+        position: absolute;
+        background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        height: 2px;
+        width: 100%;
+        opacity: 0.1;
+        animation: moveLine 8s linear infinite;
+    }
+
+    .line:nth-child(1) {
+        top: 20%;
+        animation-delay: 0s;
+    }
+
+    .line:nth-child(2) {
+        top: 40%;
+        animation-delay: 2s;
+    }
+
+    .line:nth-child(3) {
+        top: 60%;
+        animation-delay: 4s;
+    }
+
+    .line:nth-child(4) {
+        top: 80%;
+        animation-delay: 6s;
+    }
+
+    @keyframes moveLine {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
     }
 
     .glass-card {
@@ -110,6 +158,12 @@
 
 {% block content %}
 <div id="vanta-bg"></div>
+<div class="moving-lines">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+</div>
 
 <!-- Hero Section -->
 <section class="min-h-screen flex items-center -mt-24">
