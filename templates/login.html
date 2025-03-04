@@ -9,11 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #00FF00;
-            --secondary-color: #000000;
-            --accent-color: #1a1a1a;
+            --primary-color: #60A5FA;
+            --secondary-color: #1E40AF;
+            --accent-color: #2563EB;
             --text-color: #FFFFFF;
-            --background-color: #0a0a0a;
+            --background-color: #0F172A;
+            --baby-blue: #93C5FD;
+            --light-blue: #BFDBFE;
         }
 
         body {
@@ -36,8 +38,8 @@
             height: 100%;
             z-index: 0;
             background: 
-                radial-gradient(circle at 15% 50%, rgba(0, 255, 0, 0.1) 0%, transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(0, 200, 0, 0.1) 0%, transparent 25%);
+                radial-gradient(circle at 15% 50%, rgba(147, 197, 253, 0.2) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(191, 219, 254, 0.2) 0%, transparent 25%);
             animation: bgAnimation 15s ease infinite alternate;
         }
 
@@ -51,9 +53,9 @@
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 24px;
             padding: 2rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -71,8 +73,8 @@
         }
 
         .input-field:focus {
-            border-color: rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+            border-color: var(--baby-blue);
+            box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.25);
             outline: none;
         }
 
@@ -95,13 +97,13 @@
         }
 
         .gradient-text {
-            background: linear-gradient(45deg, var(--primary-color), #00CC00);
+            background: linear-gradient(45deg, var(--baby-blue), var(--light-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .btn-primary {
-            background: var(--primary-color);
+            background: linear-gradient(45deg, var(--baby-blue), var(--light-blue));
             border: none;
             border-radius: 12px;
             padding: 1rem;
@@ -112,9 +114,9 @@
         }
 
         .btn-primary:hover {
-            background: #00CC00;
+            background: linear-gradient(45deg, var(--light-blue), var(--baby-blue));
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.4);
+            box-shadow: 0 4px 20px rgba(147, 197, 253, 0.4);
         }
 
         .btn-primary:disabled {
@@ -129,8 +131,8 @@
     
     <div class="min-h-screen flex flex-col items-center justify-center relative z-10 px-4">
         <nav class="w-full flex justify-between items-center py-4 px-6 fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-20">
-            <a href="{{ url_for('landing') }}" class="text-2xl font-bold" style="color: var(--primary-color)">Encypherist</a>
-            <a href="{{ url_for('landing') }}" class="text-sm text-gray-300 hover:text-green-400 transition-colors">← Back to Home</a>
+            <a href="{{ url_for('landing') }}" class="text-2xl font-bold" style="color: var(--baby-blue)">Encypherist</a>
+            <a href="{{ url_for('landing') }}" class="text-sm text-gray-300 hover:text-blue-400 transition-colors">← Back to Home</a>
         </nav>
 
         <div class="glass w-full max-w-md">
@@ -139,7 +141,7 @@
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="mb-4 p-4 rounded-lg bg-red-500 bg-opacity-20 text-red-200 text-center text-sm">
+                        <div class="mb-4 p-4 rounded-lg bg-blue-500 bg-opacity-20 text-blue-200 text-center text-sm">
                             {{ message }}
                         </div>
                     {% endfor %}
@@ -171,7 +173,6 @@
                         <input type="checkbox" class="mr-2">
                         <span class="text-gray-300">Remember me</span>
                     </label>
-                    <a href="#" class="text-blue-400 hover:text-blue-300">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="btn-primary" id="submitBtn">
@@ -181,7 +182,7 @@
 
             <p class="mt-8 text-center text-gray-400">
                 Don't have an account? 
-                <a href="{{ url_for('register') }}" class="text-green-400 hover:text-green-300">Register here</a>
+                <a href="{{ url_for('register') }}" class="text-blue-400 hover:text-blue-300">Register here</a>
             </p>
         </div>
     </div>
