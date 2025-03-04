@@ -156,11 +156,9 @@
 
     /* Solar System Animation */
     .solar-system {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        width: 200px;
-        height: 200px;
+        position: relative;
+        width: 100px;
+        height: 100px;
     }
 
     .sun {
@@ -211,11 +209,9 @@
 
     /* Computer Line Drawing Animation */
     .computer-drawing {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        width: 300px;
-        height: 200px;
+        position: relative;
+        width: 150px;
+        height: 100px;
     }
 
     .computer-line {
@@ -230,6 +226,28 @@
     @keyframes drawLine {
         to {
             stroke-dashoffset: 0;
+        }
+    }
+
+    .animations-container {
+        position: absolute;
+        display: inline-flex;
+        align-items: center;
+        gap: 20px;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 50px;
+    }
+
+    @media (max-width: 768px) {
+        .animations-container {
+            position: relative;
+            right: auto;
+            top: auto;
+            transform: none;
+            margin-top: 20px;
+            justify-content: center;
         }
     }
 </style>
@@ -247,7 +265,7 @@
 <!-- Hero Section -->
 <section class="min-h-screen flex items-center -mt-24">
     <div class="container mx-auto px-4 sm:px-6">
-        <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+        <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center relative">
             <div class="space-y-6 md:space-y-8">
                 <div class="space-y-2 md:space-y-4">
                     <span class="tech-badge">AI</span>
@@ -256,7 +274,31 @@
                 </div>
                 <h1 class="hero-title text-4xl md:text-7xl font-extrabold leading-tight">
                     Innovate
-                    <span class="gradient-text block">Tech Events</span>
+                    <div class="relative">
+                        <span class="gradient-text block">Tech Events</span>
+                        <div class="animations-container">
+                            <div class="solar-system">
+                                <div class="sun"></div>
+                                <div class="orbit">
+                                    <div class="planet"></div>
+                                </div>
+                                <div class="orbit">
+                                    <div class="planet"></div>
+                                </div>
+                                <div class="orbit">
+                                    <div class="planet"></div>
+                                </div>
+                            </div>
+                            <div class="computer-drawing">
+                                <svg viewBox="0 0 300 200">
+                                    <path class="computer-line" d="M50,50 L250,50 L250,150 L50,150 Z"/>
+                                    <path class="computer-line" d="M70,70 L230,70 L230,130 L70,130 Z"/>
+                                    <path class="computer-line" d="M120,150 L180,150 L200,180 L100,180 Z"/>
+                                    <path class="computer-line" d="M80,160 L220,160 L230,170 L70,170 Z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
                     For Tomorrow
                 </h1>
                 <p class="hero-description text-lg md:text-xl text-gray-400 leading-relaxed">
@@ -394,34 +436,6 @@
         </div>
     </div>
 </section>
-
-<!-- Add this where you want the solar system to appear -->
-<div class="solar-system">
-    <div class="sun"></div>
-    <div class="orbit">
-        <div class="planet"></div>
-    </div>
-    <div class="orbit">
-        <div class="planet"></div>
-    </div>
-    <div class="orbit">
-        <div class="planet"></div>
-    </div>
-</div>
-
-<!-- Add this where you want the computer drawing to appear -->
-<div class="computer-drawing">
-    <svg viewBox="0 0 300 200">
-        <!-- Monitor -->
-        <path class="computer-line" d="M50,50 L250,50 L250,150 L50,150 Z"/>
-        <!-- Screen -->
-        <path class="computer-line" d="M70,70 L230,70 L230,130 L70,130 Z"/>
-        <!-- Stand -->
-        <path class="computer-line" d="M120,150 L180,150 L200,180 L100,180 Z"/>
-        <!-- Keyboard -->
-        <path class="computer-line" d="M80,160 L220,160 L230,170 L70,170 Z"/>
-    </svg>
-</div>
 {% endblock %}
 
 {% block scripts %}
