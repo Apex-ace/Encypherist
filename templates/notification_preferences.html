@@ -1,329 +1,258 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encypherist - Settings</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #000000 0%, #111827 100%);
-            color: white;
-            min-height: 100vh;
-        }
+{% extends "base.html" %}
 
-        .glass {
-            background: rgba(17, 24, 39, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
+{% block title %}Notification Preferences{% endblock %}
 
-        .gradient-text {
-            background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .glass {
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
 
-        .settings-nav-item {
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-        }
+    .gradient-text {
+        background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-        .settings-nav-item:hover {
-            background: rgba(31, 41, 55, 0.7);
-            border-left-color: #e5e7eb;
-        }
+    .settings-nav-item {
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
 
-        .settings-nav-item.active {
-            background: rgba(31, 41, 55, 0.7);
-            border-left-color: #e5e7eb;
-        }
+    .settings-nav-item:hover {
+        background: rgba(31, 41, 55, 0.7);
+        border-left-color: #e5e7eb;
+    }
 
-        .toggle-switch {
-            width: 48px;
-            height: 24px;
-            background: rgba(31, 41, 55, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .settings-nav-item.active {
+        background: rgba(31, 41, 55, 0.7);
+        border-left-color: #e5e7eb;
+    }
 
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            background: #e5e7eb;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: all 0.3s ease;
-        }
+    .toggle-switch {
+        width: 48px;
+        height: 24px;
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
 
-        .toggle-switch.active {
-            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-        }
+    .toggle-switch::after {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        background: #e5e7eb;
+        border-radius: 50%;
+        top: 2px;
+        left: 2px;
+        transition: all 0.3s ease;
+    }
 
-        .toggle-switch.active::after {
-            transform: translateX(24px);
-        }
+    .toggle-switch.active {
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    }
 
-        .time-input {
-            background: rgba(31, 41, 55, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            transition: all 0.3s ease;
-        }
+    .toggle-switch.active::after {
+        transform: translateX(24px);
+    }
 
-        .time-input:focus {
-            background: rgba(55, 65, 81, 0.7);
-            border-color: #e5e7eb;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(229, 231, 235, 0.2);
-        }
+    .time-input {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: white;
+        transition: all 0.3s ease;
+    }
 
-        .nav-link {
-            position: relative;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
+    .time-input:focus {
+        background: rgba(55, 65, 81, 0.7);
+        border-color: #e5e7eb;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(229, 231, 235, 0.2);
+    }
 
-        .nav-link:hover {
-            background: rgba(31, 41, 55, 0.7);
-        }
+    .nav-link {
+        position: relative;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
 
-        .nav-link.active {
-            background: rgba(31, 41, 55, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .nav-link:hover {
+        background: rgba(31, 41, 55, 0.7);
+    }
 
-        .save-button {
-            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
+    .nav-link.active {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .save-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-        }
+    .save-button {
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
 
-        .scroll-container {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(55, 65, 81, 0.7) rgba(17, 24, 39, 0.7);
-        }
+    .save-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    }
 
-        .scroll-container::-webkit-scrollbar {
-            width: 6px;
-        }
+    .scroll-container {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(55, 65, 81, 0.7) rgba(17, 24, 39, 0.7);
+    }
 
-        .scroll-container::-webkit-scrollbar-track {
-            background: rgba(17, 24, 39, 0.7);
-            border-radius: 3px;
-        }
+    .scroll-container::-webkit-scrollbar {
+        width: 6px;
+    }
 
-        .scroll-container::-webkit-scrollbar-thumb {
-            background: rgba(55, 65, 81, 0.7);
-            border-radius: 3px;
-        }
+    .scroll-container::-webkit-scrollbar-track {
+        background: rgba(17, 24, 39, 0.7);
+        border-radius: 3px;
+    }
 
-        .scroll-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(75, 85, 99, 0.7);
-        }
-    </style>
-</head>
-<body class="relative">
-    <!-- Background Pattern -->
-    <div class="fixed inset-0 opacity-30">
-        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23333333\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"></div>
-    </div>
+    .scroll-container::-webkit-scrollbar-thumb {
+        background: rgba(55, 65, 81, 0.7);
+        border-radius: 3px;
+    }
 
-    <!-- Navigation -->
-    <nav class="fixed w-full z-50 glass">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold gradient-text">Encypherist</h1>
-                <div class="flex items-center space-x-8">
-                    <a href="{{ url_for('home') }}" class="nav-link hover:text-gray-300 transition flex items-center">
-                        <i class="fas fa-home mr-2"></i> Events
-                    </a>
-                    <a href="{{ url_for('create_event') }}" class="nav-link hover:text-gray-300 transition flex items-center">
-                        <i class="fas fa-plus mr-2"></i> Create Event
-                    </a>
-                    <a href="{{ url_for('messages') }}" class="nav-link hover:text-gray-300 transition flex items-center">
-                        <i class="fas fa-envelope mr-2"></i> Messages
-                    </a>
-                    <a href="{{ url_for('notifications') }}" class="nav-link hover:text-gray-300 transition flex items-center">
+    .scroll-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(75, 85, 99, 0.7);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24">
+    <div class="glass">
+        <div class="flex">
+            <!-- Settings Navigation -->
+            <div class="w-1/4 border-r border-gray-700 p-6">
+                <h2 class="text-xl font-semibold mb-6">Settings</h2>
+                <div class="space-y-2">
+                    <a href="#notifications" class="settings-nav-item active block p-3 rounded-lg">
                         <i class="fas fa-bell mr-2"></i> Notifications
                     </a>
-                    <div class="relative group">
-                        <button class="flex items-center space-x-2 hover:text-gray-300 transition p-2 rounded-lg">
-                            <div class="relative">
-                                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) if current_user.profile_picture else 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}"
-                                     alt="Profile"
-                                     class="w-10 h-10 rounded-full border-2 border-gray-700">
-                                <div class="online-indicator"></div>
+                    <a href="#account" class="settings-nav-item block p-3 rounded-lg">
+                        <i class="fas fa-user-circle mr-2"></i> Account
+                    </a>
+                    <a href="#privacy" class="settings-nav-item block p-3 rounded-lg">
+                        <i class="fas fa-shield-alt mr-2"></i> Privacy
+                    </a>
+                    <a href="#appearance" class="settings-nav-item block p-3 rounded-lg">
+                        <i class="fas fa-paint-brush mr-2"></i> Appearance
+                    </a>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="w-3/4 p-6">
+                <div id="notifications" class="space-y-8">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Notification Preferences</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Email Notifications</h4>
+                                    <p class="text-sm text-gray-400">Receive notifications via email</p>
+                                </div>
+                                <div class="toggle-switch active"></div>
                             </div>
-                            <span>{{ current_user.username }}</span>
-                            <i class="fas fa-chevron-down text-sm"></i>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Push Notifications</h4>
+                                    <p class="text-sm text-gray-400">Receive notifications in browser</p>
+                                </div>
+                                <div class="toggle-switch"></div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">SMS Notifications</h4>
+                                    <p class="text-sm text-gray-400">Receive notifications via SMS</p>
+                                </div>
+                                <div class="toggle-switch"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Notification Types</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Event Updates</h4>
+                                    <p class="text-sm text-gray-400">Get notified about event changes and updates</p>
+                                </div>
+                                <div class="toggle-switch active"></div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">New Messages</h4>
+                                    <p class="text-sm text-gray-400">Receive notifications for new messages</p>
+                                </div>
+                                <div class="toggle-switch active"></div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Booking Confirmations</h4>
+                                    <p class="text-sm text-gray-400">Get notified about booking status changes</p>
+                                </div>
+                                <div class="toggle-switch active"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Notification Schedule</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Quiet Hours</h4>
+                                    <p class="text-sm text-gray-400">Set times when you don't want to receive notifications</p>
+                                </div>
+                                <div class="toggle-switch"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Start Time</label>
+                                    <input type="time" class="time-input w-full p-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">End Time</label>
+                                    <input type="time" class="time-input w-full p-2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button class="save-button px-6 py-2 text-white font-medium">
+                            Save Changes
                         </button>
-                        <div class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg glass hidden group-hover:block">
-                            <a href="{{ url_for('profile') }}" class="flex items-center px-4 py-3 hover:bg-gray-700 hover:bg-opacity-50 rounded-t-lg">
-                                <i class="fas fa-user mr-2"></i> Profile
-                            </a>
-                            <a href="{{ url_for('edit_profile') }}" class="flex items-center px-4 py-3 hover:bg-gray-700 hover:bg-opacity-50">
-                                <i class="fas fa-edit mr-2"></i> Edit Profile
-                            </a>
-                            <a href="{{ url_for('notification_preferences') }}" class="flex items-center px-4 py-3 hover:bg-gray-700 hover:bg-opacity-50">
-                                <i class="fas fa-cog mr-2"></i> Settings
-                            </a>
-                            <form action="{{ url_for('logout') }}" method="POST" class="block">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="w-full flex items-center px-4 py-3 hover:bg-gray-700 hover:bg-opacity-50 rounded-b-lg text-red-400 hover:text-red-300">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                                </button>
-                            </form>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
+</div>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-6 pt-24 pb-12">
-        <div class="glass">
-            <div class="flex">
-                <!-- Settings Navigation -->
-                <div class="w-1/4 border-r border-gray-700 p-6">
-                    <h2 class="text-xl font-semibold mb-6">Settings</h2>
-                    <div class="space-y-2">
-                        <a href="#notifications" class="settings-nav-item active block p-3 rounded-lg">
-                            <i class="fas fa-bell mr-2"></i> Notifications
-                        </a>
-                        <a href="#account" class="settings-nav-item block p-3 rounded-lg">
-                            <i class="fas fa-user-circle mr-2"></i> Account
-                        </a>
-                        <a href="#privacy" class="settings-nav-item block p-3 rounded-lg">
-                            <i class="fas fa-shield-alt mr-2"></i> Privacy
-                        </a>
-                        <a href="#appearance" class="settings-nav-item block p-3 rounded-lg">
-                            <i class="fas fa-paint-brush mr-2"></i> Appearance
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Settings Content -->
-                <div class="w-3/4 p-6">
-                    <div id="notifications" class="space-y-8">
-                        <div>
-                            <h3 class="text-lg font-semibold mb-4">Notification Preferences</h3>
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="font-medium">Email Notifications</h4>
-                                        <p class="text-sm text-gray-400">Receive notifications via email</p>
-                                    </div>
-                                    <div class="toggle-switch active"></div>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="font-medium">Push Notifications</h4>
-                                        <p class="text-sm text-gray-400">Receive notifications in browser</p>
-                                    </div>
-                                    <div class="toggle-switch"></div>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="font-medium">SMS Notifications</h4>
-                                        <p class="text-sm text-gray-400">Receive notifications via SMS</p>
-                                    </div>
-                                    <div class="toggle-switch"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 class="text-lg font-semibold mb-4">Notification Types</h3>
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="font-medium">New Event Announcements</h4>
-                                        <p class="text-sm text-gray-400">Get notified about new events</p>
-                                    </div>
-                                    <div class="toggle-switch active"></div>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="font-medium">Booking Confirmations</h4>
-                                        <p class="text-sm text-gray-400">Get notified when your booking is confirmed</p>
-                                    </div>
-                                    <div class="toggle-switch active"></div>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="font-medium">Event Reminders</h4>
-                                        <p class="text-sm text-gray-400">Get reminded before your events</p>
-                                    </div>
-                                    <div class="toggle-switch active"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 class="text-lg font-semibold mb-4">Notification Schedule</h3>
-                            <div class="space-y-4">
-                                <div class="flex items-center space-x-4">
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Start Time</label>
-                                        <input type="time" class="time-input px-3 py-2" value="09:00">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">End Time</label>
-                                        <input type="time" class="time-input px-3 py-2" value="21:00">
-                                    </div>
-                                </div>
-                                <p class="text-sm text-gray-400">Notifications will only be sent during these hours</p>
-                            </div>
-                        </div>
-
-                        <div class="pt-6 border-t border-gray-700">
-                            <button type="submit" class="save-button px-6 py-2 text-white font-medium">
-                                Save Changes
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // Toggle Switch Functionality
-        document.querySelectorAll('.toggle-switch').forEach(toggle => {
-            toggle.addEventListener('click', () => {
-                toggle.classList.toggle('active');
-            });
-        });
-
-        // Settings Navigation
-        document.querySelectorAll('.settings-nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.settings-nav-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-            });
-        });
-    </script>
-</body>
-</html> 
+<script>
+document.querySelectorAll('.toggle-switch').forEach(switch_ => {
+    switch_.addEventListener('click', function() {
+        this.classList.toggle('active');
+    });
+});
+</script>
+{% endblock %} 

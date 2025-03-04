@@ -1,606 +1,432 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encypherist - Organizer Profile</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #000000 0%, #111827 100%);
-            color: white;
-            min-height: 100vh;
-        }
+{% extends "base.html" %}
 
-        .glass {
-            background: rgba(17, 24, 39, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
+{% block title %}Organizer Profile{% endblock %}
 
-        .glass-hover:hover {
-            background: rgba(31, 41, 55, 0.7);
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-        }
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .glass {
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
 
-        .gradient-text {
-            background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .glass-hover:hover {
+        background: rgba(31, 41, 55, 0.7);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
 
-        .gradient-border {
-            position: relative;
-            border-radius: 24px;
-            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-            padding: 1px;
-        }
+    .gradient-text {
+        background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-        .gradient-border-content {
-            background: rgba(17, 24, 39, 0.95);
-            border-radius: 24px;
-            height: 100%;
-        }
+    .gradient-border {
+        position: relative;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+        padding: 1px;
+    }
 
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    .gradient-border-content {
+        background: rgba(17, 24, 39, 0.95);
+        border-radius: 24px;
+        height: 100%;
+    }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-        }
+    .btn-primary {
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            transition: all 0.3s ease;
-        }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    }
 
-        .btn-primary:hover::after {
-            left: 100%;
-        }
+    .btn-primary::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: rotate(45deg);
+        transition: all 0.3s ease;
+    }
 
-        .btn-secondary {
-            background: rgba(31, 41, 55, 0.7);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .btn-primary:hover::after {
+        left: 100%;
+    }
 
-        .btn-secondary:hover {
-            background: rgba(55, 65, 81, 0.7);
-            transform: translateY(-2px);
-        }
+    .btn-secondary {
+        background: rgba(31, 41, 55, 0.7);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .profile-picture-container {
-            position: relative;
-            width: 150px;
-            height: 150px;
-            margin: 0 auto;
-        }
+    .btn-secondary:hover {
+        background: rgba(55, 65, 81, 0.7);
+        transform: translateY(-2px);
+    }
 
-        .profile-picture {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            position: relative;
-            z-index: 1;
-        }
+    .profile-picture-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
 
-        .profile-picture-border {
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-            z-index: 0;
-        }
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        position: relative;
+        z-index: 1;
+    }
 
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            letter-spacing: 0.025em;
-            text-transform: uppercase;
-        }
+    .profile-picture-border {
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+        z-index: 0;
+    }
 
-        .status-pending {
-            background: rgba(234, 179, 8, 0.1);
-            color: #fbbf24;
-            border: 1px solid rgba(234, 179, 8, 0.2);
-        }
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
+    }
 
-        .status-approved {
-            background: rgba(34, 197, 94, 0.1);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-        }
+    .status-pending {
+        background: rgba(234, 179, 8, 0.1);
+        color: #fbbf24;
+        border: 1px solid rgba(234, 179, 8, 0.2);
+    }
 
-        .status-rejected {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
+    .status-approved {
+        background: rgba(34, 197, 94, 0.1);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
 
-        .tab {
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
+    .status-rejected {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
 
-        .tab.active {
-            background: rgba(31, 41, 55, 0.7);
-            color: #e5e7eb;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .tab {
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
 
-        .tab:hover:not(.active) {
-            background: rgba(31, 41, 55, 0.4);
-        }
+    .tab.active {
+        background: rgba(31, 41, 55, 0.7);
+        color: #e5e7eb;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .stat-card {
-            position: relative;
-            overflow: hidden;
-        }
+    .tab:hover:not(.active) {
+        background: rgba(31, 41, 55, 0.4);
+    }
 
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(55, 65, 81, 0.1) 0%, rgba(31, 41, 55, 0.1) 100%);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+    }
 
-        .stat-card:hover::before {
-            opacity: 1;
-        }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(55, 65, 81, 0.1) 0%, rgba(31, 41, 55, 0.1) 100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
 
-        .event-card {
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .stat-card:hover::before {
+        opacity: 1;
+    }
 
-        .event-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(255, 255, 255, 0.2);
-            background: rgba(31, 41, 55, 0.7);
-        }
+    .event-card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .icon-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(31, 41, 55, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .event-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(31, 41, 55, 0.7);
+    }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
-        }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
 
-        .nav-link {
-            position: relative;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
 
-        .nav-link:hover {
-            background: rgba(31, 41, 55, 0.7);
-        }
+    .nav-link {
+        position: relative;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
 
-        .nav-link.active {
-            background: rgba(31, 41, 55, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .nav-link:hover {
+        background: rgba(31, 41, 55, 0.7);
+    }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
+    .nav-link.active {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        ::-webkit-scrollbar-track {
-            background: rgba(17, 24, 39, 0.7);
-            border-radius: 4px;
-        }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
 
-        ::-webkit-scrollbar-thumb {
-            background: rgba(55, 65, 81, 0.7);
-            border-radius: 4px;
-        }
+    ::-webkit-scrollbar-track {
+        background: rgba(17, 24, 39, 0.7);
+        border-radius: 4px;
+    }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(75, 85, 99, 0.7);
-        }
-    </style>
-</head>
-<body class="relative">
-    <!-- Background Pattern -->
-    <div class="fixed inset-0 opacity-30">
-        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23333333' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"></div>
+    ::-webkit-scrollbar-thumb {
+        background: rgba(55, 65, 81, 0.7);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(75, 85, 99, 0.7);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24">
+    <!-- Profile Header -->
+    <div class="glass p-6 mb-6">
+        <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
+            <!-- Profile Picture -->
+            <div class="profile-picture-container">
+                <div class="profile-picture-border"></div>
+                <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) if user.profile_picture else url_for('static', filename='images/default_profile.png') }}"
+                     alt="Profile Picture"
+                     class="profile-picture">
+            </div>
+
+            <!-- Profile Info -->
+            <div class="flex-1 text-center md:text-left">
+                <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
+                    <div>
+                        <h1 class="text-3xl font-bold mb-2">{{ user.username }}</h1>
+                        <p class="text-gray-400 mb-4">{{ user.email }}</p>
+                        <span class="status-badge status-{{ user.status }}">
+                            {{ user.status|title }}
+                        </span>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary">
+                            <i class="fas fa-edit mr-2"></i> Edit Profile
+                        </a>
+                        <a href="{{ url_for('create_event') }}" class="btn btn-primary">
+                            <i class="fas fa-plus mr-2"></i> Create Event
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="fixed w-full z-50 glass">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold gradient-text">Encypherist</h1>
-                <div class="flex items-center space-x-8">
-                    <a href="{{ url_for('home') }}" class="nav-link hover:text-blue-400 transition flex items-center">
-                        <i class="fas fa-home mr-2"></i> Events
-                    </a>
-                    <a href="{{ url_for('create_event') }}" class="btn btn-primary flex items-center">
-                        <i class="fas fa-plus mr-2"></i> Create Event
-                    </a>
-                    <a href="{{ url_for('messages') }}" class="nav-link hover:text-blue-400 transition flex items-center">
-                        <i class="fas fa-envelope mr-2"></i> Messages
-                    </a>
-                    <a href="{{ url_for('notifications') }}" class="nav-link hover:text-blue-400 transition flex items-center">
-                        <i class="fas fa-bell mr-2"></i> Notifications
-                    </a>
-                    <div class="relative group">
-                        <button class="flex items-center space-x-2 hover:text-blue-400 transition p-2 rounded-lg">
-                            <div class="relative">
-                                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) if current_user.profile_picture else 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}"
-                                     alt="Profile"
-                                     class="w-10 h-10 rounded-full border-2 border-blue-400">
-                                <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
-                            </div>
-                            <span>{{ current_user.username }}</span>
-                            <i class="fas fa-chevron-down text-sm"></i>
-                        </button>
-                        <div class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg glass hidden group-hover:block">
-                            <a href="{{ url_for('profile') }}" class="flex items-center px-4 py-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-t-lg">
-                                <i class="fas fa-user mr-2"></i> Profile
-                            </a>
-                            <a href="{{ url_for('edit_profile') }}" class="flex items-center px-4 py-3 hover:bg-blue-500 hover:bg-opacity-20">
-                                <i class="fas fa-edit mr-2"></i> Edit Profile
-                            </a>
-                            <a href="{{ url_for('notification_preferences') }}" class="flex items-center px-4 py-3 hover:bg-blue-500 hover:bg-opacity-20">
-                                <i class="fas fa-cog mr-2"></i> Settings
-                            </a>
-                            <form action="{{ url_for('logout') }}" method="POST" class="block">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="w-full flex items-center px-4 py-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-b-lg text-red-400 hover:text-red-300">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="glass p-6 stat-card">
+            <div class="flex items-center space-x-4">
+                <div class="icon-circle">
+                    <i class="fas fa-calendar-alt text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">{{ stats.total_events }}</h3>
+                    <p class="text-gray-400">Total Events</p>
                 </div>
             </div>
         </div>
-    </nav>
+        <div class="glass p-6 stat-card">
+            <div class="flex items-center space-x-4">
+                <div class="icon-circle">
+                    <i class="fas fa-ticket-alt text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">{{ stats.total_bookings }}</h3>
+                    <p class="text-gray-400">Total Bookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="glass p-6 stat-card">
+            <div class="flex items-center space-x-4">
+                <div class="icon-circle">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">{{ stats.total_attendees }}</h3>
+                    <p class="text-gray-400">Total Attendees</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-6 pt-24 pb-12 relative">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="mb-6 p-4 rounded-lg bg-blue-500 bg-opacity-20 text-blue-200 text-center">
-                        {{ message }}
+    <!-- Tabs -->
+    <div class="glass p-6">
+        <div class="flex space-x-4 mb-6 overflow-x-auto pb-2">
+            <button class="tab active" onclick="showTab('events')">
+                <i class="fas fa-calendar-alt mr-2"></i> Events
+            </button>
+            <button class="tab" onclick="showTab('bookings')">
+                <i class="fas fa-ticket-alt mr-2"></i> Bookings
+            </button>
+            <button class="tab" onclick="showTab('analytics')">
+                <i class="fas fa-chart-bar mr-2"></i> Analytics
+            </button>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="events" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for event in events %}
+                <div class="glass p-6 event-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-semibold">{{ event.title }}</h3>
+                        <span class="status-badge status-{{ event.status }}">
+                            {{ event.status|title }}
+                        </span>
                     </div>
+                    <p class="text-gray-400 mb-4">{{ event.description[:100] }}...</p>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-400">
+                            <i class="fas fa-calendar mr-1"></i> {{ event.date.strftime('%B %d, %Y') }}
+                        </div>
+                        <a href="{{ url_for('event', event_id=event.id) }}" class="btn btn-secondary">
+                            View Details
+                        </a>
+                    </div>
+                </div>
                 {% endfor %}
-            {% endif %}
-        {% endwith %}
+            </div>
+        </div>
 
-        <div class="glass p-8">
-            <div class="flex flex-col md:flex-row gap-8">
-                <!-- Profile Sidebar -->
-                <div class="w-full md:w-1/4">
-                    <div class="text-center">
-                        <div class="profile-picture-container mb-6">
-                            <div class="profile-picture-border"></div>
-                            <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) if user.profile_picture else 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}"
-                                 alt="Profile Picture"
-                                 class="profile-picture">
-                        </div>
-                        <h2 class="text-2xl font-bold mb-2">{{ user.username }}</h2>
-                        <div class="flex items-center justify-center mb-6">
-                            <span class="bg-purple-500 bg-opacity-20 text-purple-400 px-3 py-1 rounded-full text-sm font-medium">
-                                <i class="fas fa-star mr-1"></i> Event Organizer
-                            </span>
-                        </div>
-                        <div class="space-y-3">
-                            <a href="{{ url_for('create_event') }}" class="btn btn-primary block w-full">
-                                <i class="fas fa-plus mr-2"></i> Create Event
-                            </a>
-                            <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary block w-full">
-                                <i class="fas fa-user-edit mr-2"></i> Edit Profile
-                            </a>
-                            <a href="{{ url_for('notification_preferences') }}" class="btn btn-secondary block w-full">
-                                <i class="fas fa-bell mr-2"></i> Notification Settings
-                            </a>
-                            <a href="{{ url_for('reset_password') }}" class="btn btn-secondary block w-full">
-                                <i class="fas fa-key mr-2"></i> Change Password
-                            </a>
-                        </div>
-                    </div>
+        <!-- Bookings Tab -->
+        <div id="bookings" class="tab-content hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-left py-4">Event</th>
+                            <th class="text-left py-4">Attendee</th>
+                            <th class="text-left py-4">Date</th>
+                            <th class="text-left py-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr class="border-t border-gray-800">
+                            <td class="py-4">{{ booking.event.title }}</td>
+                            <td class="py-4">{{ booking.user.username }}</td>
+                            <td class="py-4">{{ booking.booking_date.strftime('%B %d, %Y') }}</td>
+                            <td class="py-4">
+                                <span class="status-badge status-{{ booking.status }}">
+                                    {{ booking.status|title }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-                    <!-- Stats -->
-                    <div class="mt-8 space-y-4">
-                        <div class="gradient-border">
-                            <div class="gradient-border-content p-6">
-                                <div class="flex items-center mb-2">
-                                    <div class="icon-circle mr-3">
-                                        <i class="fas fa-calendar text-blue-400"></i>
-                                    </div>
-                                    <h3 class="text-lg font-semibold">Total Events</h3>
-                                </div>
-                                <p class="text-3xl font-bold gradient-text">{{ events|length }}</p>
-                            </div>
-                        </div>
-                        <div class="gradient-border">
-                            <div class="gradient-border-content p-6">
-                                <div class="flex items-center mb-2">
-                                    <div class="icon-circle mr-3">
-                                        <i class="fas fa-check-circle text-green-400"></i>
-                                    </div>
-                                    <h3 class="text-lg font-semibold">Active Events</h3>
-                                </div>
-                                <p class="text-3xl font-bold gradient-text">
-                                    {{ events|selectattr('status', 'equalto', 'approved')|list|length }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="gradient-border">
-                            <div class="gradient-border-content p-6">
-                                <div class="flex items-center mb-2">
-                                    <div class="icon-circle mr-3">
-                                        <i class="fas fa-ticket-alt text-purple-400"></i>
-                                    </div>
-                                    <h3 class="text-lg font-semibold">Total Tickets Sold</h3>
-                                </div>
-                                <p class="text-3xl font-bold gradient-text">
-                                    {% set total_sold = 0 %}
-                                    {% for event in events %}
-                                        {% set total_sold = total_sold + (event.total_tickets - event.remaining_tickets) %}
-                                    {% endfor %}
-                                    {{ total_sold }}
-                                </p>
-                            </div>
-                        </div>
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass p-6">
+                    <h3 class="text-xl font-semibold mb-4">Revenue Overview</h3>
+                    <div class="h-64">
+                        <!-- Add your chart here -->
                     </div>
                 </div>
-
-                <!-- Events Section -->
-                <div class="w-full md:w-3/4">
-                    <div class="flex space-x-4 mb-6">
-                        <button class="tab active flex items-center" onclick="showTab('upcoming')">
-                            <i class="fas fa-calendar-alt mr-2"></i> Upcoming Events
-                        </button>
-                        <button class="tab flex items-center" onclick="showTab('past')">
-                            <i class="fas fa-history mr-2"></i> Past Events
-                        </button>
-                    </div>
-
-                    <!-- Upcoming Events -->
-                    <div id="upcoming" class="space-y-4">
-                        {% set upcoming_events = [] %}
-                        {% for event in events %}
-                            {% if event.date > now %}
-                                {% set _ = upcoming_events.append(event) %}
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if upcoming_events %}
-                            {% for event in upcoming_events %}
-                                <div class="glass p-6 rounded-lg event-card">
-                                    <div class="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h4 class="text-xl font-semibold gradient-text">{{ event.title }}</h4>
-                                            <p class="text-gray-400 flex items-center mt-1">
-                                                <i class="far fa-calendar mr-2"></i>
-                                                {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
-                                            </p>
-                                        </div>
-                                        {% if event.status == 'pending' %}
-                                            <div class="text-right">
-                                                <span class="status-badge bg-yellow-500 bg-opacity-20 text-yellow-400 px-3 py-1 rounded-full text-sm">
-                                                    <i class="fas fa-clock mr-1"></i> Pending Approval
-                                                </span>
-                                                <p class="text-xs text-gray-400 mt-1">This event will be visible on the home page after admin approval</p>
-                                            </div>
-                                        {% elif event.status == 'approved' %}
-                                            <span class="status-badge bg-green-500 bg-opacity-20 text-green-400 px-3 py-1 rounded-full text-sm">
-                                                <i class="fas fa-check-circle mr-1"></i> Approved
-                                            </span>
-                                        {% else %}
-                                            <span class="status-badge bg-red-500 bg-opacity-20 text-red-400 px-3 py-1 rounded-full text-sm">
-                                                <i class="fas fa-times-circle mr-1"></i> Rejected
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-2 gap-6 text-sm text-gray-400">
-                                        <div class="space-y-2">
-                                            <p class="flex items-center">
-                                                <i class="fas fa-map-marker-alt w-5"></i>
-                                                <span class="ml-2">{{ event.location }}</span>
-                                            </p>
-                                            <p class="flex items-center">
-                                                <i class="fas fa-tag w-5"></i>
-                                                <span class="ml-2">{{ event.category }}</span>
-                                            </p>
-                                            <p class="flex items-center">
-                                                <i class="fas fa-dollar-sign w-5"></i>
-                                                <span class="ml-2">${{ "%.2f"|format(event.price) }}</span>
-                                            </p>
-                                        </div>
-                                        <div class="space-y-2">
-                                            <p class="flex items-center">
-                                                <i class="fas fa-ticket-alt w-5"></i>
-                                                <span class="ml-2">{{ event.total_tickets }} Total</span>
-                                            </p>
-                                            <p class="flex items-center">
-                                                <i class="fas fa-clock w-5"></i>
-                                                <span class="ml-2">{{ event.remaining_tickets }} Remaining</span>
-                                            </p>
-                                            <p class="flex items-center">
-                                                <i class="fas fa-chart-line w-5"></i>
-                                                <span class="ml-2">{{ event.total_tickets - event.remaining_tickets }} Sold</span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4 flex justify-end space-x-4">
-                                        <form action="{{ url_for('delete_event', event_id=event.id) }}" method="POST" class="inline">
-                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <button type="submit" class="flex items-center text-red-400 hover:text-red-300 transition">
-                                                <i class="fas fa-trash-alt mr-2"></i> Delete Event
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="text-center py-12">
-                                <div class="mb-6 float-animation">
-                                    <i class="fas fa-calendar-plus text-6xl text-blue-400 opacity-50"></i>
-                                </div>
-                                <p class="text-gray-400 mb-4">No upcoming events.</p>
-                                <a href="{{ url_for('create_event') }}" class="btn btn-primary inline-flex items-center">
-                                    <i class="fas fa-plus mr-2"></i> Create New Event
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Past Events -->
-                    <div id="past" class="space-y-4 hidden">
-                        {% set past_events = [] %}
-                        {% for event in events %}
-                            {% if event.date <= now %}
-                                {% set _ = past_events.append(event) %}
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if past_events %}
-                            {% for event in past_events %}
-                                <div class="glass p-6 rounded-lg event-card opacity-75">
-                                    <div class="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h4 class="text-xl font-semibold gradient-text">{{ event.title }}</h4>
-                                            <p class="text-gray-400 flex items-center mt-1">
-                                                <i class="far fa-calendar mr-2"></i>
-                                                {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
-                                            </p>
-                                        </div>
-                                        <span class="status-badge status-{{ event.status }}">
-                                            <i class="fas fa-circle text-xs mr-1"></i>
-                                            {{ event.status|title }}
-                                        </span>
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-2 gap-6 text-sm text-gray-400">
-                                        <div class="space-y-2">
-                                            <p class="flex items-center">
-                                                <i class="fas fa-map-marker-alt w-5"></i>
-                                                <span class="ml-2">{{ event.location }}</span>
-                                            </p>
-                                            <p class="flex items-center">
-                                                <i class="fas fa-tag w-5"></i>
-                                                <span class="ml-2">{{ event.category }}</span>
-                                            </p>
-                                            <p class="flex items-center">
-                                                <i class="fas fa-dollar-sign w-5"></i>
-                                                <span class="ml-2">${{ "%.2f"|format(event.price) }}</span>
-                                            </p>
-                                        </div>
-                                        <div class="space-y-2">
-                                            <p class="flex items-center">
-                                                <i class="fas fa-ticket-alt w-5"></i>
-                                                <span class="ml-2">{{ event.total_tickets }} Total</span>
-                                            </p>
-                                            <p class="flex items-center">
-                                                <i class="fas fa-chart-line w-5"></i>
-                                                <span class="ml-2">{{ event.total_tickets - event.remaining_tickets }} Sold</span>
-                                            </p>
-                                            <p class="flex items-center">
-                                                <i class="fas fa-coins w-5"></i>
-                                                <span class="ml-2">${{ "%.2f"|format((event.total_tickets - event.remaining_tickets) * event.price) }}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="text-center py-12">
-                                <div class="mb-6 float-animation">
-                                    <i class="fas fa-history text-6xl text-gray-400 opacity-50"></i>
-                                </div>
-                                <p class="text-gray-400">No past events.</p>
-                            </div>
-                        {% endif %}
+                <div class="glass p-6">
+                    <h3 class="text-xl font-semibold mb-4">Event Performance</h3>
+                    <div class="h-64">
+                        <!-- Add your chart here -->
                     </div>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
+</div>
 
-    <script>
-        function showTab(tabName) {
-            // Hide all tabs
-            document.getElementById('upcoming').classList.add('hidden');
-            document.getElementById('past').classList.add('hidden');
-            
-            // Show selected tab
-            document.getElementById(tabName).classList.remove('hidden');
-            
-            // Update tab buttons
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                tab.classList.remove('active');
-                if (tab.textContent.toLowerCase().includes(tabName)) {
-                    tab.classList.add('active');
-                }
-            });
-        }
-    </script>
-</body>
-</html> 
+<script>
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Show selected tab content
+    document.getElementById(tabName).classList.remove('hidden');
+
+    // Update tab styles
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+}
+</script>
+{% endblock %} 

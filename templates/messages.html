@@ -1,480 +1,299 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messages - Encypherist</title>
-    <!-- Preload critical assets -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" as="style">
-    <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #00FF00;
-            --secondary-color: #000000;
-            --accent-color: #1a1a1a;
-            --text-color: #FFFFFF;
-            --background-color: #0a0a0a;
-        }
+{% extends "base.html" %}
 
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            min-height: 100vh;
-        }
+{% block title %}Messages{% endblock %}
 
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            content-visibility: auto;
-            contain-intrinsic-size: 0 500px;
-        }
+{% block extra_head %}
+<style>
+    .glass {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        content-visibility: auto;
+        contain-intrinsic-size: 0 500px;
+    }
 
-        .message-container {
-            height: calc(100vh - 200px);
-            overflow-y: auto;
-            overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-color) var(--background-color);
-            scroll-behavior: smooth;
-            padding-bottom: 20px;
-        }
+    .message-container {
+        height: calc(100vh - 200px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) var(--background-color);
+        scroll-behavior: smooth;
+        padding-bottom: 20px;
+    }
 
-        .message-container::-webkit-scrollbar {
-            width: 6px;
-        }
+    .message-container::-webkit-scrollbar {
+        width: 6px;
+    }
 
-        .message-container::-webkit-scrollbar-track {
-            background: var(--background-color);
-        }
+    .message-container::-webkit-scrollbar-track {
+        background: var(--background-color);
+    }
 
-        .message-container::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color);
-            border-radius: 3px;
-        }
+    .message-container::-webkit-scrollbar-thumb {
+        background-color: var(--primary-color);
+        border-radius: 3px;
+    }
 
-        .message-bubble {
-            max-width: 85%;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            margin-bottom: 12px;
-            line-height: 24px;
-            position: relative;
-            padding: 10px 20px;
-            border-radius: 25px;
-        }
+    .message-bubble {
+        max-width: 85%;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        margin-bottom: 12px;
+        line-height: 24px;
+        position: relative;
+        padding: 10px 20px;
+        border-radius: 25px;
+    }
 
-        .message-bubble.sent {
-            background: linear-gradient(135deg, #00FF00 0%, #00CC00 100%);
-            color: black;
-            float: right;
-        }
+    .message-bubble.sent {
+        background: linear-gradient(135deg, #00FF00 0%, #00CC00 100%);
+        color: black;
+        float: right;
+    }
 
-        .message-bubble.received {
-            background: rgba(255, 255, 255, 0.1);
-            float: left;
-        }
+    .message-bubble.received {
+        background: rgba(255, 255, 255, 0.1);
+        float: left;
+    }
 
-        .message-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 12px 20px;
-            color: white;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
+    .message-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 25px;
+        padding: 12px 20px;
+        color: white;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
 
-        .message-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
-        }
+    .message-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
+    }
 
-        .send-button {
-            background: linear-gradient(135deg, #00FF00 0%, #00CC00 100%);
-            color: black;
-            border-radius: 25px;
-            padding: 12px 24px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
+    .send-button {
+        background: linear-gradient(135deg, #00FF00 0%, #00CC00 100%);
+        color: black;
+        border-radius: 25px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
 
-        .send-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+    .send-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+    }
+
+    .conversation-list {
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .conversation-item {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .conversation-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .conversation-item.active {
+        background: rgba(0, 255, 0, 0.1);
+        border-right: 3px solid var(--primary-color);
+    }
+
+    .unread-badge {
+        background: var(--primary-color);
+        color: black;
+        border-radius: 12px;
+        padding: 2px 8px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .mobile-header {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .conversation-list {
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .conversation-item {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .conversation-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .conversation-item.active {
-            background: rgba(0, 255, 0, 0.1);
-            border-right: 3px solid var(--primary-color);
-        }
-
-        .unread-badge {
-            background: var(--primary-color);
-            color: black;
-            border-radius: 12px;
-            padding: 2px 8px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .mobile-header {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .mobile-header {
-                display: flex;
-                align-items: center;
-                padding: 1rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .conversation-list {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 50;
-                background: var(--background-color);
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-            }
-
-            .conversation-list.active {
-                transform: translateX(0);
-            }
-
-            .message-area {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 40;
-                background: var(--background-color);
-                transform: translateX(100%);
-                transition: transform 0.3s ease-in-out;
-            }
-
-            .message-area.active {
-                transform: translateX(0);
-            }
-
-            .message-bubble {
-                max-width: 90%;
-            }
-
-            .message-input-container {
-                padding: 0.5rem;
-            }
-
-            .send-button {
-                padding: 0.75rem 1.5rem;
-            }
-        }
-
-        /* Prevent layout shifts for profile pictures */
-        .profile-picture-container {
-            aspect-ratio: 1;
-            width: 40px;
-            height: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .profile-picture {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            background: var(--background-color);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
         }
 
-        .profile-picture.loaded {
-            opacity: 1;
+        .conversation-list.active {
+            transform: translateX(0);
         }
 
-        /* Add skeleton loading state */
-        .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
+        .message-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 40;
+            background: var(--background-color);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
         }
 
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        .message-area.active {
+            transform: translateX(0);
         }
-    </style>
-</head>
-<body>
-    <nav class="w-full flex justify-between items-center py-4 px-4 sm:px-6 fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-20">
-        <a href="{{ url_for('home') }}" class="text-xl sm:text-2xl font-bold" style="color: var(--primary-color)">Encypherist</a>
-        <div class="flex items-center space-x-4 sm:space-x-6">
-            <a href="{{ url_for('profile') }}" class="text-sm text-gray-300 hover:text-green-400 transition-colors">Profile</a>
-            <a href="{{ url_for('notifications') }}" class="text-sm text-gray-300 hover:text-green-400 transition-colors">Notifications</a>
-            <form action="{{ url_for('logout') }}" method="POST" class="inline">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="text-sm text-gray-300 hover:text-red-400 transition-colors">Logout</button>
-            </form>
-        </div>
-    </nav>
 
-    <div class="container mx-auto px-4 pt-20 pb-8">
-        <div class="glass grid grid-cols-1 md:grid-cols-4 min-h-[calc(100vh-120px)]">
-            <!-- Conversation List -->
-            <div class="conversation-list p-4 space-y-4">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold">Messages</h2>
-                    <button class="md:hidden text-white" onclick="toggleConversationList()">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                {% for user_id, conv in conversations.items() %}
-                <div class="conversation-item p-4 rounded-lg {% if other_user and other_user.id == user_id %}active{% endif %}"
-                     onclick="window.location.href='{{ url_for('conversation', user_id=user_id) }}'">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            {% if conv.user.profile_picture %}
-                            <div class="profile-picture-container">
-                                <img src="{{ url_for('static', filename='uploads/' + conv.user.profile_picture) }}" 
-                                     alt="Profile" class="profile-picture">
-                            </div>
-                            {% else %}
-                            <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                                <span class="text-black font-semibold">{{ conv.user.username[0].upper() }}</span>
-                            </div>
-                            {% endif %}
-                            <div>
-                                <h3 class="font-medium">{{ conv.user.username }}</h3>
-                                <p class="text-sm text-gray-400 truncate">
-                                    {{ conv.last_message.content[:30] + '...' if conv.last_message.content|length > 30 else conv.last_message.content }}
-                                </p>
-                            </div>
-                        </div>
-                        {% if conv.unread > 0 %}
-                        <span class="unread-badge">{{ conv.unread }}</span>
-                        {% endif %}
+        .message-bubble {
+            max-width: 90%;
+        }
+
+        .message-input-container {
+            padding: 0.5rem;
+        }
+
+        .send-button {
+            padding: 0.75rem 1.5rem;
+        }
+    }
+
+    /* Prevent layout shifts for profile pictures */
+    .profile-picture-container {
+        aspect-ratio: 1;
+        width: 40px;
+        height: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-picture {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .profile-picture.loaded {
+        opacity: 1;
+    }
+
+    /* Add skeleton loading state */
+    .skeleton {
+        background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 pt-20 pb-8">
+    <div class="glass grid grid-cols-1 md:grid-cols-4 min-h-[calc(100vh-120px)]">
+        <!-- Conversation List -->
+        <div class="conversation-list p-4 space-y-4">
+            {% for conversation in conversations %}
+            <div class="conversation-item p-4 rounded-lg {% if conversation.id == current_conversation.id %}active{% endif %}"
+                 onclick="window.location.href='{{ url_for('conversation', conversation_id=conversation.id) }}'">
+                <div class="flex items-center space-x-4">
+                    <div class="profile-picture-container">
+                        <img src="{{ conversation.other_user.profile_picture or url_for('static', filename='images/default_profile.png') }}"
+                             alt="{{ conversation.other_user.username }}"
+                             class="profile-picture"
+                             onload="this.classList.add('loaded')">
                     </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-semibold truncate">{{ conversation.other_user.username }}</h3>
+                            {% if conversation.unread_count > 0 %}
+                            <span class="unread-badge">{{ conversation.unread_count }}</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm text-gray-400 truncate">{{ conversation.last_message.content }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Message Area -->
+        <div class="message-area md:col-span-3 flex flex-col">
+            {% if current_conversation %}
+            <div class="mobile-header md:hidden">
+                <button onclick="toggleConversationList()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <h2 class="text-lg font-semibold ml-4">{{ current_conversation.other_user.username }}</h2>
+            </div>
+
+            <div class="message-container p-4 flex-1">
+                {% for message in current_conversation.messages %}
+                <div class="message-bubble {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                    {{ message.content }}
                 </div>
                 {% endfor %}
             </div>
 
-            <!-- Message Area -->
-            <div class="message-area col-span-1 md:col-span-3 flex flex-col">
-                {% if other_user %}
-                <div class="mobile-header md:hidden">
-                    <button class="text-white mr-4" onclick="toggleConversationList()">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    <div class="flex items-center space-x-3">
-                        {% if other_user.profile_picture %}
-                        <div class="profile-picture-container">
-                            <img src="{{ url_for('static', filename='uploads/' + other_user.profile_picture) }}" 
-                                 alt="Profile" class="profile-picture">
-                        </div>
-                        {% else %}
-                        <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                            <span class="text-black font-semibold">{{ other_user.username[0].upper() }}</span>
-                        </div>
-                        {% endif %}
-                        <div>
-                            <h2 class="text-lg font-semibold">{{ other_user.username }}</h2>
-                            <p class="text-sm text-gray-400">
-                                {% if other_user.role == 'organizer' %}Event Organizer{% else %}Student{% endif %}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-4 border-b border-gray-800 hidden md:block">
-                    <div class="flex items-center space-x-3">
-                        {% if other_user.profile_picture %}
-                        <div class="profile-picture-container">
-                            <img src="{{ url_for('static', filename='uploads/' + other_user.profile_picture) }}" 
-                                 alt="Profile" class="profile-picture">
-                        </div>
-                        {% else %}
-                        <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
-                            <span class="text-black font-semibold">{{ other_user.username[0].upper() }}</span>
-                        </div>
-                        {% endif %}
-                        <div>
-                            <h2 class="text-xl font-semibold">{{ other_user.username }}</h2>
-                            <p class="text-sm text-gray-400">
-                                {% if other_user.role == 'organizer' %}Event Organizer{% else %}Student{% endif %}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="message-container p-4 md:p-6 flex-grow">
-                    {% for message in messages %}
-                    <div class="clear-both">
-                        <div class="message-bubble {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %}">
-                            {{ message.content }}
-                            <div class="text-xs mt-1 {% if message.sender_id == current_user.id %}text-gray-800{% else %}text-gray-400{% endif %}">
-                                {{ message.timestamp.strftime('%I:%M %p') }}
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <form method="POST" action="{{ url_for('send_message', user_id=other_user.id) }}" 
-                      class="message-input-container p-4 border-t border-gray-800 flex items-center space-x-4">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <form action="{{ url_for('send_message', conversation_id=current_conversation.id) }}" method="POST" class="message-input-container p-4 border-t border-gray-800">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="flex space-x-4">
                     <input type="text" name="content" class="message-input" placeholder="Type your message..." required>
                     <button type="submit" class="send-button">Send</button>
-                </form>
-                {% else %}
-                <div class="flex-grow flex items-center justify-center">
-                    <div class="text-center">
-                        <h3 class="text-xl font-semibold mb-2">Select a conversation</h3>
-                        <p class="text-gray-400">Choose a conversation from the list to start messaging</p>
-                    </div>
                 </div>
-                {% endif %}
+            </form>
+            {% else %}
+            <div class="flex items-center justify-center h-full">
+                <p class="text-gray-400">Select a conversation to start messaging</p>
             </div>
+            {% endif %}
         </div>
     </div>
+</div>
 
-    <script>
-        const otherUserId = {% if other_user %}{{ other_user.id }}{% else %}null{% endif %};
-        const conversationUrl = {% if other_user %}'{{ url_for('conversation', user_id=other_user.id) }}'{% else %}''{% endif %};
+<script>
+function toggleConversationList() {
+    const conversationList = document.querySelector('.conversation-list');
+    const messageArea = document.querySelector('.message-area');
+    
+    if (conversationList.classList.contains('active')) {
+        conversationList.classList.remove('active');
+        messageArea.classList.add('active');
+    } else {
+        conversationList.classList.add('active');
+        messageArea.classList.remove('active');
+    }
+}
 
-        function toggleConversationList() {
-            const conversationList = document.querySelector('.conversation-list');
-            const messageArea = document.querySelector('.message-area');
-            
-            if (window.innerWidth <= 768) {
-                if (conversationList.classList.contains('active')) {
-                    conversationList.classList.remove('active');
-                    messageArea.classList.add('active');
-                } else {
-                    conversationList.classList.add('active');
-                    messageArea.classList.remove('active');
-                }
-            }
-        }
-
-        class MessageHandler {
-            constructor() {
-                if (!otherUserId) return;
-                
-                this.container = document.querySelector('.message-container');
-                this.form = document.querySelector('form');
-                this.setupEventListeners();
-                this.startPolling();
-            }
-
-            scrollToBottom() {
-                if (this.container) {
-                    this.container.scrollTop = this.container.scrollHeight;
-                }
-            }
-
-            setupEventListeners() {
-                if (this.form) {
-                    this.form.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        this.sendMessage();
-                    });
-                }
-            }
-
-            async sendMessage() {
-                const input = this.form.querySelector('input[name="content"]');
-                const content = input.value.trim();
-                
-                if (!content) return;
-
-                try {
-                    const response = await fetch(conversationUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
-                        },
-                        body: JSON.stringify({ content })
-                    });
-
-                    if (response.ok) {
-                        input.value = '';
-                        this.scrollToBottom();
-                    }
-                } catch (error) {
-                    console.error('Error sending message:', error);
-                }
-            }
-
-            async startPolling() {
-                setInterval(async () => {
-                    try {
-                        const response = await fetch(conversationUrl);
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.messages) {
-                                this.updateMessages(data.messages);
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error polling messages:', error);
-                    }
-                }, 5000);
-            }
-
-            updateMessages(messages) {
-                // Update messages in the UI
-                // This would need to be implemented based on your specific needs
-            }
-        }
-
-        // Initialize message handler
-        new MessageHandler();
-
-        // Add image loading optimization
-        document.addEventListener('DOMContentLoaded', function() {
-            const profilePictures = document.querySelectorAll('.profile-picture');
-            
-            profilePictures.forEach(picture => {
-                if (picture.complete) {
-                    picture.classList.add('loaded');
-                } else {
-                    picture.onload = function() {
-                        this.classList.add('loaded');
-                    };
-                }
-            });
-        });
-    </script>
-</body>
-</html> 
+// Auto-scroll to bottom of message container
+const messageContainer = document.querySelector('.message-container');
+if (messageContainer) {
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+}
+</script>
+{% endblock %} 

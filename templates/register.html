@@ -1,226 +1,280 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encypherist - Register</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #60A5FA;
-            --secondary-color: #1E40AF;
-            --accent-color: #2563EB;
-            --text-color: #FFFFFF;
-            --background-color: #0F172A;
-            --baby-blue: #93C5FD;
-            --light-blue: #BFDBFE;
-        }
+{% extends "base.html" %}
 
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
-            position: relative;
-            overflow: hidden;
-        }
+{% block title %}Register{% endblock %}
+
+{% block extra_head %}
+<style>
+    .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .input-field {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        width: 100%;
+        color: white;
+        transition: all 0.3s ease;
+        margin-bottom: 0.5rem;
+    }
+
+    .input-field:focus {
+        border-color: var(--baby-blue);
+        box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.25);
+        outline: none;
+    }
+
+    .input-field.error {
+        border-color: rgba(239, 68, 68, 0.5);
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .role-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .role-option {
+        flex: 1;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .role-option:hover {
+        border-color: var(--baby-blue);
+        background: rgba(147, 197, 253, 0.1);
+    }
+
+    .role-option.selected {
+        border-color: var(--baby-blue);
+        background: rgba(147, 197, 253, 0.2);
+    }
+
+    .role-option input[type="radio"] {
+        display: none;
+    }
+
+    .role-option label {
+        display: block;
+        cursor: pointer;
+    }
+
+    .role-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col items-center justify-center relative z-10 px-4">
+    <div class="glass w-full max-w-md">
+        <h2 class="text-3xl font-bold mb-6 text-center gradient-text">Create Account</h2>
         
-        .animated-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            background: 
-                radial-gradient(circle at 85% 50%, rgba(147, 197, 253, 0.1) 0%, transparent 25%),
-                radial-gradient(circle at 15% 30%, rgba(191, 219, 254, 0.1) 0%, transparent 25%);
-            animation: bgAnimation 15s ease infinite alternate;
-        }
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-lg bg-blue-500 bg-opacity-20 text-blue-200 text-center text-sm">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-        @keyframes bgAnimation {
-            0% {
-                transform: scale(1) rotate(0deg);
-            }
-            100% {
-                transform: scale(1.2) rotate(-5deg);
-            }
-        }
-
-        .glass {
-            background: rgba(147, 197, 253, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--primary-color);
-            border-radius: 24px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(147, 197, 253, 0.1);
-        }
-
-        .input-field {
-            background: rgba(147, 197, 253, 0.05);
-            border: 1px solid var(--primary-color);
-            border-radius: 12px;
-            padding: 1rem;
-            width: 100%;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .input-field::placeholder {
-            color: rgba(147, 197, 253, 0.5);
-        }
-
-        .input-field:focus {
-            border-color: var(--baby-blue);
-            box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.25);
-            outline: none;
-        }
-
-        .gradient-text {
-            background: linear-gradient(45deg, var(--primary-color), var(--baby-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: var(--secondary-color);
-            font-weight: bold;
-            padding: 1rem;
-            border-radius: 12px;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: var(--baby-blue);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(147, 197, 253, 0.4);
-        }
-
-        .role-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .role-option {
-            background: rgba(147, 197, 253, 0.05);
-            border: 1px solid var(--primary-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .role-option:hover {
-            background: rgba(147, 197, 253, 0.1);
-            transform: translateY(-2px);
-            border-color: var(--baby-blue);
-        }
-
-        .role-option.selected {
-            background: rgba(147, 197, 253, 0.15);
-            border-color: var(--baby-blue);
-            box-shadow: 0 4px 20px rgba(147, 197, 253, 0.2);
-        }
-
-        .role-option svg {
-            width: 2.5rem;
-            height: 2.5rem;
-            margin: 0 auto 1rem;
-            color: var(--primary-color);
-        }
-    </style>
-</head>
-<body>
-    <div class="animated-bg"></div>
-    
-    <div class="min-h-screen flex flex-col items-center justify-center relative z-10 px-4 sm:px-6 lg:px-8">
-    <div class="min-h-screen flex flex-col items-center justify-center relative z-10 px-4">
-        <nav class="w-full flex justify-between items-center py-4 px-6 fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-20">
-            <a href="{{ url_for('landing') }}" class="text-2xl font-bold" style="color: var(--primary-color)">Encypherist</a>
-            <a href="{{ url_for('landing') }}" class="text-sm text-gray-300 hover:text-green-400 transition-colors">← Back to Home</a>
-        </nav>
-
-        <div class="glass w-full max-w-md">
-            <h2 class="text-3xl font-bold mb-6 text-center gradient-text">Create Account</h2>
+        <form method="POST" action="{{ url_for('register') }}" class="space-y-4" id="registerForm" onsubmit="return validateForm()">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="mb-4 p-4 rounded-lg bg-red-500 bg-opacity-20 text-red-200 text-center text-sm">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form method="POST" action="{{ url_for('register') }}" class="space-y-4">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                
-                <div class="role-selector">
-                    <label class="role-option" onclick="selectRole('student')">
-                        <input type="radio" name="role" value="student" class="hidden" required>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"/>
-                        </svg>
-                        <h3 class="text-lg font-semibold mb-2">Student</h3>
-                        <p class="text-sm text-gray-400">Book and attend events</p>
-                    </label>
-                    
-                    <label class="role-option" onclick="selectRole('organizer')">
-                        <input type="radio" name="role" value="organizer" class="hidden" required>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        <h3 class="text-lg font-semibold mb-2">Organizer</h3>
-                        <p class="text-sm text-gray-400">Create and manage events</p>
+            <div class="role-selector">
+                <div class="role-option">
+                    <input type="radio" id="student" name="role" value="student" checked>
+                    <label for="student">
+                        <div class="role-icon">👨‍🎓</div>
+                        <div>Student</div>
                     </label>
                 </div>
-
-                <div>
-                    <input type="text" id="username" name="username" required
-                           class="input-field"
-                           placeholder="Choose a username">
+                <div class="role-option">
+                    <input type="radio" id="organizer" name="role" value="organizer">
+                    <label for="organizer">
+                        <div class="role-icon">🎯</div>
+                        <div>Organizer</div>
+                    </label>
                 </div>
-                
-                <div>
-                    <input type="password" id="password" name="password" required
-                           class="input-field"
-                           placeholder="Create a password">
-                    <p class="text-xs text-gray-400 mt-1">Password must be at least 6 characters long</p>
-                </div>
+            </div>
 
-                <button type="submit" class="btn-primary mt-6">
-                    Create Account
-                </button>
-            </form>
+            <div>
+                <input type="email" id="email" name="email" required
+                       class="input-field"
+                       pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                       placeholder="Enter your Gmail address">
+                <div class="error-message" id="emailError">Please enter a valid Gmail address (example@gmail.com)</div>
+            </div>
 
-            <p class="mt-8 text-center text-gray-400">
-                Already have an account? 
-                <a href="{{ url_for('login') }}" class="text-green-400 hover:text-green-300">Login here</a>
-            </p>
-        </div>
+            <div>
+                <input type="text" id="username" name="username" required
+                       class="input-field"
+                       minlength="3"
+                       placeholder="Choose a username">
+                <div class="error-message" id="usernameError">Username must be at least 3 characters long</div>
+            </div>
+            
+            <div>
+                <input type="password" id="password" name="password" required
+                       class="input-field"
+                       minlength="6"
+                       placeholder="Create a password">
+                <div class="error-message" id="passwordError">Password must be at least 6 characters long</div>
+            </div>
+
+            <div>
+                <input type="password" id="confirm_password" name="confirm_password" required
+                       class="input-field"
+                       placeholder="Confirm your password">
+                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">
+                Create Account
+            </button>
+        </form>
+
+        <p class="mt-8 text-center text-gray-400">
+            Already have an account? 
+            <a href="{{ url_for('login') }}" class="text-blue-400 hover:text-blue-300">Login here</a>
+        </p>
     </div>
+</div>
 
-    <script>
-        function selectRole(role) {
-            document.querySelectorAll('.role-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            const selectedOption = document.querySelector(`.role-option input[value="${role}"]`).parentElement;
-            selectedOption.classList.add('selected');
+<script>
+    const emailInput = document.getElementById('email');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const emailError = document.getElementById('emailError');
+    const usernameError = document.getElementById('usernameError');
+    const passwordError = document.getElementById('passwordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+    const submitBtn = document.getElementById('submitBtn');
+    const roleOptions = document.querySelectorAll('.role-option');
+
+    function validateEmail(email) {
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        return gmailRegex.test(email);
+    }
+
+    function showError(input, errorElement, message) {
+        input.classList.add('error');
+        errorElement.style.display = 'block';
+        errorElement.textContent = message;
+    }
+
+    function hideError(input, errorElement) {
+        input.classList.remove('error');
+        errorElement.style.display = 'none';
+    }
+
+    function validateForm() {
+        let isValid = true;
+
+        // Email validation
+        if (!validateEmail(emailInput.value)) {
+            showError(emailInput, emailError, 'Please enter a valid Gmail address (example@gmail.com)');
+            isValid = false;
+        } else {
+            hideError(emailInput, emailError);
         }
-    </script>
-</body>
-</html>
+
+        // Username validation
+        if (usernameInput.value.length < 3) {
+            showError(usernameInput, usernameError, 'Username must be at least 3 characters long');
+            isValid = false;
+        } else {
+            hideError(usernameInput, usernameError);
+        }
+
+        // Password validation
+        if (passwordInput.value.length < 6) {
+            showError(passwordInput, passwordError, 'Password must be at least 6 characters long');
+            isValid = false;
+        } else {
+            hideError(passwordInput, passwordError);
+        }
+
+        // Confirm password validation
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            showError(confirmPasswordInput, confirmPasswordError, 'Passwords do not match');
+            isValid = false;
+        } else {
+            hideError(confirmPasswordInput, confirmPasswordError);
+        }
+
+        return isValid;
+    }
+
+    // Real-time validation
+    emailInput.addEventListener('input', () => {
+        if (validateEmail(emailInput.value)) {
+            hideError(emailInput, emailError);
+        } else {
+            showError(emailInput, emailError, 'Please enter a valid Gmail address (example@gmail.com)');
+        }
+    });
+
+    usernameInput.addEventListener('input', () => {
+        if (usernameInput.value.length >= 3) {
+            hideError(usernameInput, usernameError);
+        } else {
+            showError(usernameInput, usernameError, 'Username must be at least 3 characters long');
+        }
+    });
+
+    passwordInput.addEventListener('input', () => {
+        if (passwordInput.value.length >= 6) {
+            hideError(passwordInput, passwordError);
+        } else {
+            showError(passwordInput, passwordError, 'Password must be at least 6 characters long');
+        }
+    });
+
+    confirmPasswordInput.addEventListener('input', () => {
+        if (passwordInput.value === confirmPasswordInput.value) {
+            hideError(confirmPasswordInput, confirmPasswordError);
+        } else {
+            showError(confirmPasswordInput, confirmPasswordError, 'Passwords do not match');
+        }
+    });
+
+    // Role selector functionality
+    roleOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            roleOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            option.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+</script>
+{% endblock %}
 
