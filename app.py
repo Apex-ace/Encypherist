@@ -1335,20 +1335,20 @@ def send_event_reminder():
 @login_required
 def messages():
     try:
-        # Get all conversations with proper joins and ordering
+        # Get the other user's ID from query parameters
+        other_user_id = request.args.get('user_id', type=int)
+        
+        # Get all conversations for the current user
         conversations = {}
+        sent_messages = Message.query.filter_by(sender_id=current_user.id).all()
+        received_messages = Message.query.filter_by(receiver_id=current_user.id).all()
         
-        # Get all messages sent or received by the current user
-        all_messages = db.session.query(Message, User).join(
-            User, db.or_(
-                db.and_(Message.receiver_id == User.id, Message.sender_id == current_user.id),
-                db.and_(Message.sender_id == User.id, Message.receiver_id == current_user.id)
-            )
-        ).order_by(Message.timestamp.desc()).all()
-        
-        # Group messages by conversation
-        for message, other_user in all_messages:
-            other_id = other_user.id
+        # Combine all messages and get unique conversations
+        all_messages = sent_messages + received_messages
+        for message in all_messages:
+            other_id = message.receiver_id if message.sender_id == current_user.id else message.sender_id
+            other_user = User.query.get(other_id)
+            
             if other_id not in conversations:
                 conversations[other_id] = {
                     'user': other_user,
@@ -1360,75 +1360,33 @@ def messages():
                     ).count()
                 }
         
-        return render_template('messages.html', conversations=conversations)
-        
-    except Exception as e:
-        print(f"Error in messages route: {str(e)}")
-        flash('An error occurred while loading messages')
-        return redirect(url_for('home'))
-
-@app.route('/messages/<int:user_id>')
-@login_required
-def conversation(user_id):
-    try:
-        other_user = User.query.get_or_404(user_id)
-        
-        # Get all messages between the two users
-        messages = Message.query.filter(
-            db.or_(
-                db.and_(Message.sender_id == current_user.id, Message.receiver_id == user_id),
-                db.and_(Message.sender_id == user_id, Message.receiver_id == current_user.id)
-            )
-        ).order_by(Message.timestamp.asc()).all()
-        
-        # Mark unread messages as read
-        unread_messages = Message.query.filter_by(
-            sender_id=user_id,
-            receiver_id=current_user.id,
-            read=False
-        ).all()
-        
-        for msg in unread_messages:
-            msg.read = True
-        
-        # Get all conversations for the sidebar
-        conversations = {}
-        all_messages = db.session.query(Message, User).join(
-            User, db.or_(
-                db.and_(Message.receiver_id == User.id, Message.sender_id == current_user.id),
-                db.and_(Message.sender_id == User.id, Message.receiver_id == current_user.id)
-            )
-        ).order_by(Message.timestamp.desc()).all()
-        
-        for message, other in all_messages:
-            other_id = other.id
-            if other_id not in conversations:
-                conversations[other_id] = {
-                    'user': other,
-                    'last_message': message,
-                    'unread': Message.query.filter_by(
-                        sender_id=other_id,
-                        receiver_id=current_user.id,
-                        read=False
-                    ).count()
-                }
-        
-        db.session.commit()
-        
-        # If it's an AJAX request, return only the messages
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return render_template('messages/_messages.html', messages=messages)
+        # If a specific conversation is selected, get those messages
+        messages = None
+        other_user = None
+        if other_user_id:
+            other_user = User.query.get_or_404(other_user_id)
+            messages = Message.query.filter(
+                ((Message.sender_id == current_user.id) & (Message.receiver_id == other_user_id)) |
+                ((Message.sender_id == other_user_id) & (Message.receiver_id == current_user.id))
+            ).order_by(Message.timestamp.asc()).all()
+            
+            # Mark messages as read
+            for message in messages:
+                if message.receiver_id == current_user.id and not message.read:
+                    message.read = True
+            
+            db.session.commit()
         
         return render_template('messages.html', 
                              conversations=conversations,
                              messages=messages,
                              other_user=other_user)
-        
+                             
     except Exception as e:
-        print(f"Error in conversation route: {str(e)}")
+        print(f"Error in messages route: {str(e)}")
         db.session.rollback()
-        flash('An error occurred while loading the conversation')
-        return redirect(url_for('messages'))
+        flash('An error occurred while loading messages')
+        return redirect(url_for('home'))
 
 @app.route('/send_message/<int:user_id>', methods=['POST'])
 @login_required
@@ -1437,7 +1395,7 @@ def send_message(user_id):
         content = request.form.get('content')
         if not content:
             flash('Message cannot be empty')
-            return redirect(url_for('conversation', user_id=user_id))
+            return redirect(url_for('messages', user_id=user_id))
         
         # Create and save the new message
         message = Message(
@@ -1450,28 +1408,29 @@ def send_message(user_id):
         db.session.add(message)
         
         # Send notification to receiver if enabled
-        receiver_prefs = NotificationPreference.query.filter_by(user_id=user_id).first()
-        if receiver_prefs and receiver_prefs.messages:
-            send_notification(
-                user_id,
-                f"New message from {current_user.username}",
-                content[:100] + "..." if len(content) > 100 else content,
-                'in-app'
+        receiver = User.query.get(user_id)
+        if receiver:
+            notification = Notification(
+                user_id=user_id,
+                type='message',
+                title=f'New message from {current_user.username}',
+                content=content[:100] + "..." if len(content) > 100 else content
             )
+            db.session.add(notification)
         
         db.session.commit()
         
         # If it's an AJAX request, return the new message HTML
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return render_template('messages/_message.html', message=message)
+            return render_template('_message.html', message=message)
         
-        return redirect(url_for('conversation', user_id=user_id))
+        return redirect(url_for('messages', user_id=user_id))
         
     except Exception as e:
         print(f"Error sending message: {str(e)}")
         db.session.rollback()
         flash('An error occurred while sending the message')
-        return redirect(url_for('conversation', user_id=user_id))
+        return redirect(url_for('messages', user_id=user_id))
 
 @app.route('/notifications')
 @login_required
