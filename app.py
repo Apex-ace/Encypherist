@@ -1,53 +1,63 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-from flask_mail import Mail, Message
 from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf.csrf import CSRFProtect
-import os
-from dotenv import load_dotenv
-from sqlalchemy.dialects.postgresql import UUID, JSONB, TIMESTAMP
-from sqlalchemy import text, event
+from jinja2.exceptions import TemplateNotFound
 import qrcode
 from io import BytesIO
 import base64
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+import os
 import json
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+from urllib.parse import quote_plus
 import psycopg2
+from sqlalchemy.dialects.postgresql import UUID, JSONB, TIMESTAMP
+from sqlalchemy import text, event
 import uuid
-try:
-    from flask_mail import Mail
-    mail = Mail(app)
-except ImportError:
-    print("Flask-Mail not installed, email functionality will be disabled")
-    mail = None
 
 # Load environment variables
 load_dotenv()
 
+# Create Flask app first
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret-key')
-app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+
+# Configure app
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
+# Initialize Flask-Mail after app creation
+from flask_mail import Mail, Message
+mail = Mail(app)
+
+# Database Configuration
+db_user = os.getenv('DB_USER')
+db_password = os.getenv('DB_PASSWORD')
+db_host = os.getenv('DB_HOST')
+db_port = os.getenv('DB_PORT')
+db_name = os.getenv('DB_NAME')
+
+# Construct database URL with proper encoding
+db_url = f"postgresql+psycopg2://{quote_plus(db_user)}:{quote_plus(db_password)}@{db_host}:{db_port}/{db_name}"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 10,
     'max_overflow': 20,
     'pool_timeout': 30,
     'pool_recycle': 1800,
-    'pool_pre_ping': True
+    'pool_pre_ping': True,
+    'connect_args': {
+        'connect_timeout': 10,
+        'options': '-c statement_timeout=30000'
+    }
 }
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
-# Initialize extensions
+# Initialize other extensions
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
