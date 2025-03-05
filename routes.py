@@ -1,14 +1,19 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user, login_user, logout_user
-from models import db, User, Event, Announcement
+from models import db, User, Event, Announcement, Booking
+from app import app, mail, Message
+from datetime import datetime, timezone
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
-def index():
-    featured_events = Event.query.filter_by(is_featured=True).order_by(Event.date.asc()).limit(3).all()
-    announcements = Announcement.query.filter_by(is_active=True).order_by(Announcement.priority.desc(), Announcement.created_at.desc()).all()
-    return render_template('index.html', featured_events=featured_events, announcements=announcements)
+def home():
+    try:
+        featured_events = Event.query.filter_by(status='active').limit(6).all()
+        return render_template('index.html', featured_events=featured_events)
+    except Exception as e:
+        flash('Error loading events')
+        return render_template('index.html', featured_events=[])
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():

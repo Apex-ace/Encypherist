@@ -1,8 +1,10 @@
-from datetime import datetime
-from sqlalchemy import TIMESTAMP, text
+from datetime import datetime, timezone
+from sqlalchemy.dialects.postgresql import UUID, JSONB, TIMESTAMP
+from sqlalchemy import text
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
+import uuid
 
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
