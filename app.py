@@ -19,6 +19,7 @@ import psycopg2
 from sqlalchemy.dialects.postgresql import UUID, JSONB, TIMESTAMP
 from sqlalchemy import text, event
 import uuid
+from flask_mail import Mail
 
 # Load environment variables
 load_dotenv()
@@ -80,6 +81,19 @@ except Exception as e:
     print(f"Error connecting to database: {e}")
     raise
 
+# Add these configurations after your existing app configs
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Create upload folders if they don't exist
+os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'events'), exist_ok=True)
+os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'profiles'), exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 # Database Models
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
@@ -120,6 +134,7 @@ class Event(db.Model):
     category = db.Column(db.String(50))
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(TIMESTAMP(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
+    poster_image = db.Column(db.String(200))
     
     # Relationships
     bookings = db.relationship('Booking', backref='event', lazy='dynamic', cascade='all, delete-orphan')
@@ -542,6 +557,15 @@ def create_event():
                     qr_file.save(os.path.join(uploads_dir, filename))
                     payment_qr = filename
 
+            # Handle poster image upload
+            if 'poster' in request.files:
+                poster = request.files['poster']
+                if poster and allowed_file(poster.filename):
+                    filename = secure_filename(f"event_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{poster.filename}")
+                    poster_path = os.path.join('uploads', 'events', filename)
+                    poster.save(os.path.join('static', poster_path))
+                    event.poster_image = poster_path
+
             # Create event
             event = Event(
                 title=title,
@@ -606,35 +630,48 @@ def delete_event(event_id):
 @app.route('/book_event/<int:event_id>', methods=['GET', 'POST'])
 @login_required
 def book_event(event_id):
-    if current_user.role != 'student':
-        flash('Only students can book events')
-        return redirect(url_for('home'))
-    
-    event = Event.query.get_or_404(event_id)
-    
-    # Convert current time to UTC with timezone awareness
-    now = datetime.now(timezone.utc)
-    
-    # Check if event has already occurred
-    if now >= event.date:
-        flash('This event has already occurred')
-        return redirect(url_for('home'))
+    try:
+        event = Event.query.get_or_404(event_id)
+        
+        if request.method == 'POST':
+            if event.remaining_tickets <= 0:
+                flash('Sorry, this event is sold out!')
+                return redirect(url_for('event_details', event_id=event_id))
 
-    # Check if user has already booked
-    existing_booking = Booking.query.filter_by(
-        user_id=current_user.id,
-        event_id=event.id
-    ).first()
-    
-    if existing_booking:
-        flash('You have already booked this event')
+            # Create booking
+            booking = Booking(
+                user_id=current_user.id,
+                event_id=event_id,
+                booking_date=datetime.now(timezone.utc),
+                payment_status='pending',
+                name=request.form.get('name'),
+                email=request.form.get('email'),
+                mobile=request.form.get('mobile'),
+                branch=request.form.get('branch'),
+                year=request.form.get('year')
+            )
+            
+            # Update ticket count
+            event.remaining_tickets -= 1
+            
+            try:
+                db.session.add(booking)
+                db.session.commit()
+                
+                # Send confirmation email
+                send_booking_confirmation_email(booking.email, event, booking)
+                
+                flash('Booking successful!')
+                return redirect(url_for('booking_confirmation', booking_id=booking.id))
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error creating booking: {str(e)}')
+                return redirect(url_for('event_details', event_id=event_id))
+                
+        return render_template('book_event.html', event=event)
+    except Exception as e:
+        flash(f'Error accessing event: {str(e)}')
         return redirect(url_for('home'))
-    
-    if request.method == 'POST':
-        # Handle form submission
-        return redirect(url_for('payment', event_id=event_id))
-    
-    return render_template('booking_form.html', event=event)
 
 @app.route('/payment/<int:event_id>', methods=['GET', 'POST'])
 @login_required
@@ -1392,45 +1429,31 @@ def messages():
 @login_required
 def send_message(user_id):
     try:
-        content = request.form.get('content')
-        if not content:
-            flash('Message cannot be empty')
-            return redirect(url_for('messages', user_id=user_id))
+        data = request.get_json()
+        content = data.get('content')
         
-        # Create and save the new message
+        if not content:
+            return jsonify({'error': 'Message cannot be empty'}), 400
+            
         message = Message(
             sender_id=current_user.id,
             receiver_id=user_id,
             content=content,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(timezone.utc)
         )
         
         db.session.add(message)
-        
-        # Send notification to receiver if enabled
-        receiver = User.query.get(user_id)
-        if receiver:
-            notification = Notification(
-                user_id=user_id,
-                type='message',
-                title=f'New message from {current_user.username}',
-                content=content[:100] + "..." if len(content) > 100 else content
-            )
-            db.session.add(notification)
-        
         db.session.commit()
         
-        # If it's an AJAX request, return the new message HTML
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return render_template('_message.html', message=message)
-        
-        return redirect(url_for('messages', user_id=user_id))
-        
+        return jsonify({
+            'id': message.id,
+            'content': message.content,
+            'timestamp': message.timestamp.isoformat(),
+            'sender_name': current_user.username
+        })
     except Exception as e:
-        print(f"Error sending message: {str(e)}")
         db.session.rollback()
-        flash('An error occurred while sending the message')
-        return redirect(url_for('messages', user_id=user_id))
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/notifications')
 @login_required
@@ -1479,113 +1502,53 @@ def send_sms(phone_number, message):
     # For example, using Twilio or a similar service
     pass
 
-def send_booking_confirmation_email(email, event, booking, is_group_member=False):
-    subject = f"Booking Confirmation - {event.title}"
-    
-    if is_group_member:
-        content = f"""
-        You have been added to a group booking for {event.title}.
-        
-        Event Details:
-        - Date: {event.date.strftime('%B %d, %Y at %I:%M %p')}
-        - Location: {event.location}
-        - Booking ID: {booking.id}
-        
-        Please keep this email for your records. The QR code for entry will be shared by the group organizer.
-        """
-    else:
-        content = f"""
+def send_booking_confirmation_email(email, event, booking):
+    try:
+        msg = Message(
+            'Booking Confirmation',
+            sender=app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[email]
+        )
+        msg.body = f'''
         Thank you for booking {event.title}!
         
-        Event Details:
+        Booking Details:
+        - Event: {event.title}
         - Date: {event.date.strftime('%B %d, %Y at %I:%M %p')}
         - Location: {event.location}
         - Booking ID: {booking.id}
         
-        You can view your ticket and QR code by logging into your account.
-        """
-    
-    send_notification(booking.user_id, subject, content, 'email')
+        Please keep this email for your records.
+        '''
+        mail.send(msg)
+    except Exception as e:
+        print(f"Error sending confirmation email: {str(e)}")
 
 @app.route('/profile')
 @login_required
 def profile():
     try:
-        print("Starting profile route execution")
-        print(f"Current user: {current_user.username}, Role: {current_user.role}")
-        
-        # Verify database connection
-        try:
-            db.session.execute(text('SELECT 1'))
-            print("Database connection verified")
-        except Exception as db_error:
-            print(f"Database connection error: {str(db_error)}")
-            db.session.rollback()
-            flash('Database connection error. Please try again.')
-            return redirect(url_for('home'))
-        
-        # Convert now to UTC with timezone awareness
         now = datetime.now(timezone.utc)
-        print(f"Current time (UTC): {now}")
         
         if current_user.role == 'organizer':
-            try:
-                print("Querying events for organizer")
-                events = Event.query.filter_by(organizer_id=current_user.id)\
-                    .order_by(Event.date.desc())\
-                    .all()
-                print(f"Found {len(events)} events for organizer {current_user.username}")
-                
-                # Ensure all event dates are datetime objects with timezone
-                for event in events:
-                    if event.date:
-                        print(f"Event {event.title} date: {event.date} (type: {type(event.date)})")
-                        # Convert to timezone-aware datetime if needed
-                        if event.date.tzinfo is None:
-                            event.date = event.date.replace(tzinfo=timezone.utc)
-                
-                return render_template('organizer_profile.html',
-                                    user=current_user,
-                                    events=events,
-                                    now=now)
-            except Exception as event_error:
-                print(f"Error querying organizer events: {str(event_error)}")
-                raise
+            events = Event.query.filter_by(organizer_id=current_user.id)\
+                .order_by(Event.date.desc())\
+                .all()
+            return render_template('organizer_profile.html',
+                                user=current_user,
+                                events=events,
+                                now=now)
         else:
-            try:
-                print("Querying bookings for student")
-                # Improved student bookings query with explicit joins and error handling
-                bookings = db.session.query(Booking)\
-                    .join(Event, Booking.event_id == Event.id)\
-                    .filter(Booking.user_id == current_user.id)\
-                    .order_by(Booking.booking_date.desc())\
-                    .all()
-            
-                print(f"Found {len(bookings)} bookings for student {current_user.username}")
-                for booking in bookings:
-                    print(f"Booking: Event ID {booking.event_id}, Date: {booking.booking_date}")
-            
-                return render_template('student_profile.html',
-                                    user=current_user,
-                                    bookings=bookings,
-                                    now=now)
-            except Exception as booking_error:
-                print(f"Error querying student bookings: {str(booking_error)}")
-                raise
-                                
+            bookings = Booking.query.filter_by(user_id=current_user.id)\
+                .join(Event)\
+                .order_by(Booking.booking_date.desc())\
+                .all()
+            return render_template('student_profile.html',
+                                user=current_user,
+                                bookings=bookings,
+                                now=now)
     except Exception as e:
-        print(f"Error in profile route: {str(e)}")
-        print(f"Error type: {type(e)}")
-        print(f"Error details: {e.__dict__}")
-        db.session.rollback()
-        
-        if isinstance(e, (db.exc.OperationalError, db.exc.StatementError)):
-            flash('Database error occurred. Please try again.')
-        elif isinstance(e, TemplateNotFound):
-            flash('Template error occurred. Please check if all template files exist.')
-        else:
-            flash('An error occurred while loading your profile. Please try again.')
-            
+        flash(f'Error loading profile: {str(e)}')
         return redirect(url_for('home'))
 
 @app.route('/profile/edit', methods=['GET', 'POST'])
@@ -2046,3 +2009,39 @@ if __name__ == '__main__':
             print("Admin user created successfully!")
         
     app.run(debug=True)
+
+@app.route('/booking_confirmation/<int:booking_id>')
+@login_required
+def booking_confirmation(booking_id):
+    try:
+        booking = Booking.query.get_or_404(booking_id)
+        if booking.user_id != current_user.id:
+            flash('Unauthorized access')
+            return redirect(url_for('home'))
+            
+        return render_template('booking_confirmation.html', booking=booking)
+    except Exception as e:
+        flash(f'Error accessing booking confirmation: {str(e)}')
+        return redirect(url_for('home'))
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html'), 500
+
+def check_db_connection():
+    try:
+        db.session.execute(text('SELECT 1'))
+        return True
+    except Exception as e:
+        print(f"Database connection error: {str(e)}")
+        return False
+
+@app.before_request
+def before_request():
+    if not check_db_connection():
+        return 'Database connection error', 500

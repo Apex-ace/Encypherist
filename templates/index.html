@@ -64,22 +64,112 @@
         }
     }
 
+    .hero-gradient {
+        background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(26,26,26,0.9) 100%);
+    }
+
     .glass-card {
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--primary-color);
-        border-radius: 24px;
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        transform-style: preserve-3d;
-        perspective: 1000px;
+        background: rgba(26, 26, 26, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 255, 0, 0.2);
+        transition: all 0.3s ease;
     }
 
     .glass-card:hover {
-        transform: translateY(-10px) rotateX(10deg) rotateY(10deg);
         border-color: var(--primary-color);
-        box-shadow: 
-            0 0 20px rgba(0, 255, 0, 0.2),
-            0 0 40px rgba(0, 255, 0, 0.1);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 255, 0, 0.1);
+    }
+
+    .gradient-text {
+        background: linear-gradient(45deg, #00ff00, #00ffaa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
+    }
+
+    .tech-badge {
+        background: rgba(0, 255, 0, 0.1);
+        border: 1px solid var(--primary-color);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .tech-badge:hover {
+        background: var(--primary-color);
+        color: var(--secondary-color);
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: var(--secondary-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+    }
+
+    .floating-animation {
+        animation: floating 6s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .event-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .event-card img {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .category-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #00ff00, #00ffaa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        color: #888;
+        margin-top: 0.5rem;
     }
 
     .floating {
@@ -106,18 +196,6 @@
         transform: translateY(-10px);
         border-color: var(--primary-color);
         box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-    }
-
-    .tech-badge {
-        background: rgba(0, 255, 0, 0.1);
-        border: 1px solid var(--primary-color);
-        border-radius: 20px;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        color: var(--primary-color);
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-        display: inline-block;
     }
 
     .gradient-border {
@@ -254,190 +332,197 @@
 {% endblock %}
 
 {% block content %}
-<div id="vanta-bg"></div>
-<div class="moving-lines">
-    <div class="line"></div>
-    <div class="line"></div>
-    <div class="line"></div>
-    <div class="line"></div>
-</div>
-
 <!-- Hero Section -->
-<section class="min-h-screen flex items-center -mt-24">
-    <div class="container mx-auto px-4 sm:px-6">
-        <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center relative">
-            <div class="space-y-6 md:space-y-8">
-                <div class="logo-container mb-6">
-                    <img src="{{ url_for('static', filename='images/logo.png') }}" 
-                         alt="Encypherist Logo" 
-                         class="h-16 md:h-20 animate-pulse">
-                </div>
-                <div class="space-y-2 md:space-y-4">
-                    <span class="tech-badge">AI</span>
-                    <span class="tech-badge">IoT</span>
-                    <span class="tech-badge">Cybersecurity</span>
-                </div>
-                <h1 class="hero-title text-4xl md:text-7xl font-extrabold leading-tight">
-                    Innovate
-                    <div class="relative">
-                        <span class="gradient-text block">Tech Events</span>
-                        <div class="animations-container">
-                            <div class="solar-system">
-                                <div class="sun"></div>
-                                <div class="orbit">
-                                    <div class="planet"></div>
-                                </div>
-                                <div class="orbit">
-                                    <div class="planet"></div>
-                                </div>
-                                <div class="orbit">
-                                    <div class="planet"></div>
-                                </div>
-                            </div>
-                            <div class="computer-drawing">
-                                <svg viewBox="0 0 300 200">
-                                    <path class="computer-line" d="M50,50 L250,50 L250,150 L50,150 Z"/>
-                                    <path class="computer-line" d="M70,70 L230,70 L230,130 L70,130 Z"/>
-                                    <path class="computer-line" d="M120,150 L180,150 L200,180 L100,180 Z"/>
-                                    <path class="computer-line" d="M80,160 L220,160 L230,170 L70,170 Z"/>
-                                </svg>
-                            </div>
-                        </div>
+<section class="min-h-screen relative flex items-center hero-gradient">
+    <div class="container mx-auto px-4 py-20">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8">
+                <div class="space-y-4">
+                    <div class="flex flex-wrap gap-3">
+                        <span class="tech-badge">AI & ML</span>
+                        <span class="tech-badge">IoT</span>
+                        <span class="tech-badge">Cybersecurity</span>
+                        <span class="tech-badge">Web3</span>
                     </div>
-                    For Tomorrow
-                </h1>
-                <p class="hero-description text-lg md:text-xl text-gray-400 leading-relaxed">
-                    Encypherist is your gateway to cutting-edge tech events. From AI workshops to IoT hackathons and cybersecurity challenges, join us in shaping the future of technology. Connect with industry experts, collaborate with peers, and transform your ideas into reality.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
-                    <a href="{{ url_for('home') }}" class="btn-primary text-center">
-                        Explore Tech Events
+                    <h1 class="text-5xl md:text-7xl font-bold leading-tight">
+                        Transform Your
+                        <span class="gradient-text">Tech Journey</span>
+                    </h1>
+                    <p class="text-xl text-gray-300">
+                        Join the most innovative tech events and shape the future of technology
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#events" class="btn-primary">
+                        Discover Events
                     </a>
-                    <a href="{{ url_for('register') }}?role=organizer" class="btn-secondary text-center">
-                        Host an Event
+                    <a href="{{ url_for('register') }}" class="btn-secondary">
+                        Join Community
                     </a>
                 </div>
             </div>
-            <div class="relative order-first md:order-last">
-                <div class="floating">
-                    <div class="lottie-container">
-                        <lottie-player
-                            src="https://assets2.lottiefiles.com/packages/lf20_uwh5hj2q.json"
-                            background="transparent"
-                            speed="1"
-                            style="width: 100%; height: 400px;"
-                            loop
-                            autoplay>
-                        </lottie-player>
-                    </div>
+            <div class="relative hidden md:block">
+                <div class="floating-animation">
+                    <lottie-player
+                        src="https://assets2.lottiefiles.com/packages/lf20_uwh5hj2q.json"
+                        background="transparent"
+                        speed="1"
+                        style="width: 100%; height: 400px;"
+                        loop
+                        autoplay>
+                    </lottie-player>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Announcements Section -->
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Announcements</h3>
+<!-- Stats Section -->
+<section class="py-20 bg-black bg-opacity-50">
+    <div class="container mx-auto px-4">
+        <div class="stats-container">
+            <div class="stat-item glass-card">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Events Hosted</div>
+            </div>
+            <div class="stat-item glass-card">
+                <div class="stat-number">10K+</div>
+                <div class="stat-label">Community Members</div>
+            </div>
+            <div class="stat-item glass-card">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Tech Partners</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Events -->
+<section id="events" class="py-20">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-12">
+            <span class="gradient-text">Featured Events</span>
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            {% for event in featured_events %}
+            <div class="event-card glass-card">
+                {% if event.poster_image %}
+                <img src="{{ url_for('static', filename=event.poster_image) }}" 
+                     alt="{{ event.title }}" 
+                     class="w-full">
+                {% endif %}
+                <div class="p-6 flex-grow">
+                    <h3 class="text-xl font-bold mb-3">{{ event.title }}</h3>
+                    <p class="text-gray-400 mb-4">{{ event.description[:100] }}...</p>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <p class="flex items-center">
+                            <i class="fas fa-calendar mr-2"></i>
+                            {{ event.date.strftime('%B %d, %Y') }}
+                        </p>
+                        <p class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            {{ event.location }}
+                        </p>
+                        <p class="flex items-center">
+                            <i class="fas fa-ticket-alt mr-2"></i>
+                            ₹{{ "%.2f"|format(event.price) }}
+                        </p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    {% if announcements %}
-                        {% for announcement in announcements %}
-                            <div class="announcement-item mb-3">
-                                <h4>{{ announcement.title }}</h4>
-                                <p class="text-muted">Posted on {{ announcement.created_at.strftime('%B %d, %Y') }}</p>
-                                <div class="announcement-content">
-                                    {{ announcement.content }}
-                                </div>
-                                {% if announcement.image_url %}
-                                    <img src="{{ url_for('static', filename=announcement.image_url) }}" 
-                                         alt="Announcement image" 
-                                         class="img-fluid mt-2">
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted">No announcements at the moment.</p>
+                <div class="p-6 pt-0">
+                    <a href="{{ url_for('event_details', event_id=event.id) }}" 
+                       class="btn-primary w-full text-center">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-20 bg-black bg-opacity-50">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-12">
+            <span class="gradient-text">Event Categories</span>
+        </h2>
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="glass-card p-6 text-center">
+                <div class="category-icon">🤖</div>
+                <h3 class="text-xl font-bold mb-2">AI & ML</h3>
+                <p class="text-gray-400">Deep learning, NLP, and computer vision</p>
+            </div>
+            <div class="glass-card p-6 text-center">
+                <div class="category-icon">🌐</div>
+                <h3 class="text-xl font-bold mb-2">IoT</h3>
+                <p class="text-gray-400">Smart devices and connected systems</p>
+            </div>
+            <div class="glass-card p-6 text-center">
+                <div class="category-icon">🔒</div>
+                <h3 class="text-xl font-bold mb-2">Cybersecurity</h3>
+                <p class="text-gray-400">Network security and ethical hacking</p>
+            </div>
+            <div class="glass-card p-6 text-center">
+                <div class="category-icon">⛓️</div>
+                <h3 class="text-xl font-bold mb-2">Web3</div>
+                <p class="text-gray-400">Blockchain and decentralized apps</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Announcements -->
+<section class="py-20">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-12">
+            <span class="gradient-text">Latest Updates</span>
+        </h2>
+        <div class="grid md:grid-cols-2 gap-8">
+            {% if announcements %}
+                {% for announcement in announcements %}
+                <div class="glass-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">{{ announcement.title }}</h3>
+                        <span class="text-sm text-gray-400">
+                            {{ announcement.created_at.strftime('%B %d, %Y') }}
+                        </span>
+                    </div>
+                    <div class="prose prose-invert">
+                        {{ announcement.content }}
+                    </div>
+                    {% if announcement.image_url %}
+                    <img src="{{ url_for('static', filename=announcement.image_url) }}" 
+                         alt="Announcement image" 
+                         class="mt-4 rounded-lg w-full">
                     {% endif %}
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Featured Events Section -->
-    <div class="row">
-        <div class="col-12">
-            <h2 class="mb-4">Featured Events</h2>
-        </div>
-        {% for event in featured_events %}
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">{{ event.title }}</h5>
-                    <p class="card-text">{{ event.description[:100] }}...</p>
-                    <p class="card-text">
-                        <small class="text-muted">
-                            <i class="fas fa-calendar"></i> {{ event.date.strftime('%B %d, %Y') }}<br>
-                            <i class="fas fa-map-marker-alt"></i> {{ event.location }}<br>
-                            <i class="fas fa-ticket-alt"></i> ₹{{ "%.2f"|format(event.price) }}
-                        </small>
-                    </p>
-                    <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-primary">Learn More</a>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-2 text-center text-gray-400">
+                    No announcements at the moment.
                 </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Tech Categories Section -->
-<section id="tech-categories" class="py-12 md:py-20 bg-black bg-opacity-50">
-    <div class="container mx-auto px-4 sm:px-6">
-        <h2 class="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-center gradient-text">Tech Categories</h2>
-        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            <div class="stat-card">
-                <div class="text-4xl mb-4">🤖</div>
-                <h3 class="text-lg md:text-xl font-bold mb-2">Artificial Intelligence</h3>
-                <p class="text-sm md:text-base text-gray-400">Explore machine learning, deep learning, and AI applications</p>
-            </div>
-            <div class="stat-card">
-                <div class="text-4xl mb-4">🌐</div>
-                <h3 class="text-lg md:text-xl font-bold mb-2">Internet of Things</h3>
-                <p class="text-sm md:text-base text-gray-400">Build and innovate with connected devices and sensors</p>
-            </div>
-            <div class="stat-card">
-                <div class="text-4xl mb-4">🔒</div>
-                <h3 class="text-lg md:text-xl font-bold mb-2">Cybersecurity</h3>
-                <p class="text-sm md:text-base text-gray-400">Learn about network security, ethical hacking, and protection</p>
-            </div>
+            {% endif %}
         </div>
     </div>
 </section>
 
-<!-- Why Choose Us Section -->
-<section id="why-choose-us" class="py-12 md:py-20">
-    <div class="container mx-auto px-4 sm:px-6">
-        <h2 class="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-center gradient-text">Why Choose Encypherist</h2>
-        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            <div class="glass-card p-4 md:p-6">
-                <div class="text-4xl mb-4">🎓</div>
-                <h3 class="text-lg md:text-xl font-bold mb-2">Expert-Led Sessions</h3>
-                <p class="text-sm md:text-base text-gray-400">Learn from industry professionals and tech experts</p>
-            </div>
-            <div class="glass-card p-4 md:p-6">
-                <div class="text-4xl mb-4">🤝</div>
-                <h3 class="text-lg md:text-xl font-bold mb-2">Networking</h3>
-                <p class="text-sm md:text-base text-gray-400">Connect with like-minded tech enthusiasts</p>
-            </div>
-            <div class="glass-card p-4 md:p-6">
-                <div class="text-4xl mb-4">💡</div>
-                <h3 class="text-lg md:text-xl font-bold mb-2">Innovation Hub</h3>
-                <p class="text-sm md:text-base text-gray-400">Access to latest tech trends and resources</p>
-            </div>
+<!-- CTA Section -->
+<section class="py-20 bg-black bg-opacity-50">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-6">
+            <span class="gradient-text">Ready to Join?</span>
+        </h2>
+        <p class="text-xl text-gray-300 mb-8">
+            Be part of the most innovative tech community
+        </p>
+        <div class="flex justify-center gap-4">
+            <a href="{{ url_for('register') }}" class="btn-primary">
+                Register Now
+            </a>
+            <a href="#events" class="btn-secondary">
+                Browse Events
+            </a>
         </div>
     </div>
 </section>
