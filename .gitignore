@@ -16,7 +16,6 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -40,6 +39,10 @@ ENV/
 
 # Logs
 *.log
+
+# Uploads
+static/uploads/*
+!static/uploads/.gitkeep
 
 # Local development
 .DS_Store

@@ -19,7 +19,12 @@ import psycopg2
 from sqlalchemy.dialects.postgresql import UUID, JSONB, TIMESTAMP
 from sqlalchemy import text, event
 import uuid
-from flask_mail import Mail
+try:
+    from flask_mail import Mail
+    mail = Mail(app)
+except ImportError:
+    print("Flask-Mail not installed, email functionality will be disabled")
+    mail = None
 
 # Load environment variables
 load_dotenv()
@@ -1503,6 +1508,10 @@ def send_sms(phone_number, message):
     pass
 
 def send_booking_confirmation_email(email, event, booking):
+    if not mail:
+        print("Email functionality is disabled")
+        return
+        
     try:
         msg = Message(
             'Booking Confirmation',
