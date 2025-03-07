@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 import logging
 import time
 import sys
+from itsdangerous import URLSafeTimedSerializer
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -1169,6 +1170,225 @@ def admin_logout():
     logout_user()
     return redirect(url_for('admin_login'))
 
+@app.route('/messages')
+@login_required
+def messages():
+    # Get all messages for the current user
+    received_messages = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.timestamp.desc()).all()
+    sent_messages = Message.query.filter_by(sender_id=current_user.id).order_by(Message.timestamp.desc()).all()
+    
+    # Mark messages as read
+    for message in received_messages:
+        if not message.read:
+            message.read = True
+    db.session.commit()
+    
+    # Get all users and events for the message form
+    users = User.query.filter(User.id != current_user.id).all()
+    events = Event.query.all()
+    
+    return render_template('messages.html', 
+                         received_messages=received_messages,
+                         sent_messages=sent_messages,
+                         users=users,
+                         events=events)
+
+@app.route('/send_message', methods=['POST'])
+@login_required
+def send_message():
+    receiver_id = request.form.get('receiver_id')
+    content = request.form.get('content')
+    event_id = request.form.get('event_id')
+    
+    if not receiver_id or not content:
+        flash('Please provide both receiver and message content')
+        return redirect(url_for('messages'))
+    
+    try:
+        message = Message(
+            sender_id=current_user.id,
+            receiver_id=receiver_id,
+            event_id=event_id,
+            content=content
+        )
+        db.session.add(message)
+        db.session.commit()
+        flash('Message sent successfully!')
+    except Exception as e:
+        db.session.rollback()
+        flash('Error sending message. Please try again.')
+    
+    return redirect(url_for('messages'))
+
+@app.route('/conversation/<int:user_id>')
+@login_required
+def conversation(user_id):
+    other_user = User.query.get_or_404(user_id)
+    messages = Message.query.filter(
+        ((Message.sender_id == current_user.id) & (Message.receiver_id == user_id)) |
+        ((Message.sender_id == user_id) & (Message.receiver_id == current_user.id))
+    ).order_by(Message.timestamp.asc()).all()
+    
+    # Mark messages as read
+    for message in messages:
+        if message.receiver_id == current_user.id and not message.read:
+            message.read = True
+    db.session.commit()
+    
+    return render_template('conversation.html', other_user=other_user, messages=messages)
+
+@app.route('/profile')
+@login_required
+def profile():
+    if current_user.role == 'student':
+        return redirect(url_for('student_profile'))
+    elif current_user.role == 'organizer':
+        return redirect(url_for('organizer_profile'))
+    return redirect(url_for('home'))
+
+@app.route('/student_profile')
+@login_required
+def student_profile():
+    if current_user.role != 'student':
+        flash('Unauthorized access')
+        return redirect(url_for('home'))
+    
+    bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.booking_date.desc()).all()
+    reviews = Review.query.filter_by(user_id=current_user.id).order_by(Review.created_at.desc()).all()
+    
+    return render_template('student_profile.html', bookings=bookings, reviews=reviews)
+
+@app.route('/organizer_profile')
+@login_required
+def organizer_profile():
+    if current_user.role != 'organizer':
+        flash('Unauthorized access')
+        return redirect(url_for('home'))
+    
+    events = Event.query.filter_by(organizer_id=current_user.id).order_by(Event.date.desc()).all()
+    total_events = len(events)
+    total_bookings = sum(event.bookings.count() for event in events)
+    total_revenue = sum(event.price * (event.total_tickets - event.remaining_tickets) for event in events)
+    
+    return render_template('organizer_profile.html',
+                         events=events,
+                         total_events=total_events,
+                         total_bookings=total_bookings,
+                         total_revenue=total_revenue)
+
+@app.route('/notifications')
+@login_required
+def notifications():
+    page = request.args.get('page', 1, type=int)
+    notifications = Notification.query.filter_by(user_id=current_user.id)\
+        .order_by(Notification.timestamp.desc())\
+        .paginate(page=page, per_page=10)
+    return render_template('notifications.html', notifications=notifications)
+
+@app.route('/notification_preferences', methods=['GET', 'POST'])
+@login_required
+def notification_preferences():
+    prefs = NotificationPreference.query.filter_by(user_id=current_user.id).first()
+    if not prefs:
+        prefs = NotificationPreference(user_id=current_user.id)
+        db.session.add(prefs)
+        db.session.commit()
+    
+    if request.method == 'POST':
+        prefs.email_notifications = 'email_notifications' in request.form
+        prefs.sms_notifications = 'sms_notifications' in request.form
+        prefs.event_updates = 'event_updates' in request.form
+        prefs.event_reminders = 'event_reminders' in request.form
+        prefs.messages = 'messages' in request.form
+        prefs.email = request.form.get('email')
+        prefs.phone = request.form.get('phone')
+        
+        db.session.commit()
+        flash('Notification preferences updated successfully!')
+        return redirect(url_for('notification_preferences'))
+    
+    return render_template('notification_preferences.html', preferences=prefs)
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if request.method == 'POST':
+        try:
+            # Handle profile picture upload
+            if 'profile_picture' in request.files:
+                file = request.files['profile_picture']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    current_user.profile_picture = filename
+            
+            # Update other fields
+            current_user.name = request.form.get('name')
+            current_user.email = request.form.get('email')
+            current_user.phone = request.form.get('phone')
+            
+            db.session.commit()
+            flash('Profile updated successfully!')
+            return redirect(url_for('profile'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash('Error updating profile. Please try again.')
+    
+    return render_template('edit_profile.html')
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+@login_required
+def reset_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not check_password_hash(current_user.password, current_password):
+            flash('Current password is incorrect')
+            return redirect(url_for('reset_password'))
+        
+        if new_password != confirm_password:
+            flash('New passwords do not match')
+            return redirect(url_for('reset_password'))
+        
+        current_user.password = generate_password_hash(new_password)
+        db.session.commit()
+        flash('Password updated successfully!')
+        return redirect(url_for('profile'))
+    
+    return render_template('reset_password.html')
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+        
+        if user:
+            # Generate password reset token
+            token = generate_reset_token(user)
+            # Send password reset email
+            send_reset_email(user, token)
+            flash('Password reset instructions have been sent to your email')
+            return redirect(url_for('login'))
+        
+        flash('Email address not found')
+        return redirect(url_for('forgot_password'))
+    
+    return render_template('forgot_password.html')
+
+@app.route('/google_login')
+def google_login():
+    # Implement Google OAuth login
+    return redirect(url_for('login'))
+
+@app.route('/event/<int:event_id>')
+def event(event_id):
+    event = Event.query.get_or_404(event_id)
+    return render_template('event_details.html', event=event)
+
 # Initialize the application
 init_app()
 
@@ -1188,6 +1408,20 @@ def health_check():
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 503
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+def generate_reset_token(user):
+    # Generate a secure token for password reset
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps(user.email, salt='password-reset-salt')
+
+def send_reset_email(user, token):
+    # Implement email sending functionality
+    # This is a placeholder - you'll need to implement actual email sending
+    pass
 
 if __name__ == '__main__':
     app.run(debug=True)
