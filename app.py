@@ -14,6 +14,12 @@ import json
 import paypalrestsdk
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+import logging
+import time
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +28,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///events.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', 'static/uploads')
+app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
+app.config['ALLOWED_EXTENSIONS'] = os.environ.get('ALLOWED_EXTENSIONS', 'png,jpg,jpeg,gif,pdf').split(',')
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('SESSION_COOKIE_SECURE', 'true').lower() == 'true'
+app.config['REMEMBER_COOKIE_SECURE'] = os.environ.get('REMEMBER_COOKIE_SECURE', 'true').lower() == 'true'
+app.config['SESSION_COOKIE_HTTPONLY'] = os.environ.get('SESSION_COOKIE_HTTPONLY', 'true').lower() == 'true'
+app.config['REMEMBER_COOKIE_HTTPONLY'] = os.environ.get('REMEMBER_COOKIE_HTTPONLY', 'true').lower() == 'true'
+app.config['PERMANENT_SESSION_LIFETIME'] = int(os.environ.get('PERMANENT_SESSION_LIFETIME', 1800))
 
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
@@ -142,6 +156,12 @@ class Review(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+@app.before_first_request
+def before_first_request():
+    """Ensure database is ready before handling any requests"""
+    if not ensure_db_ready():
+        return jsonify({"error": "Database is not ready. Please try again later."}), 503
 
 @app.route('/')
 def landing():
@@ -1628,17 +1648,61 @@ def book_group(event_id):
     
     return render_template('group_booking.html', event=event)
 
+def wait_for_db(max_retries=5, delay=2):
+    """Wait for database to be ready"""
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})...")
+            db.engine.connect()
+            logger.info("Database connection successful!")
+            return True
+        except Exception as e:
+            logger.warning(f"Database connection attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
+                logger.info(f"Waiting {delay} seconds before next attempt...")
+                time.sleep(delay)
+            else:
+                logger.error("Failed to connect to database after maximum retries")
+                return False
+
+def ensure_db_ready():
+    """Ensure database is ready before starting the application"""
+    if not wait_for_db():
+        logger.error("Database is not ready. Exiting...")
+        return False
+    
+    try:
+        # Test if tables exist
+        inspector = db.inspect(db.engine)
+        tables = inspector.get_table_names()
+        if not tables:
+            logger.error("No tables found in database. Please run database initialization first.")
+            return False
+        logger.info(f"Database is ready with tables: {tables}")
+        return True
+    except Exception as e:
+        logger.error(f"Error checking database: {str(e)}")
+        return False
+
+# Initialize database tables
+with app.app_context():
+    db.create_all()
+
+@app.route('/health')
+def health_check():
+    """Health check endpoint to verify database connectivity"""
+    try:
+        # Test database connection
+        db.engine.connect()
+        # Check if tables exist
+        inspector = db.inspect(db.engine)
+        tables = inspector.get_table_names()
+        if not tables:
+            return jsonify({"status": "error", "message": "No tables found"}), 503
+        return jsonify({"status": "healthy", "tables": tables}), 200
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 503
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
-        # Creates admin user if not exists
-        # Default credentials: admin@gmail.com/admin123
-        admin = User(
-            username='admin@gmail.com',
-            password=generate_password_hash('123456789'),
-            role='admin'
-        )
-        db.session.add(admin)
-        db.session.commit()
     app.run(debug=True)

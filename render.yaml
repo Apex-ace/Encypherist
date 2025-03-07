@@ -8,7 +8,7 @@ services:
       cd /opt/render/project/src
       PYTHONPATH=/opt/render/project/src LOG_LEVEL=DEBUG python init_db.py || exit 1
       echo "Database initialization completed. Starting application..."
-      PYTHONPATH=/opt/render/project/src FLASK_APP=app.py FLASK_ENV=production gunicorn app:app --timeout 120 --workers 4 --log-level debug
+      PYTHONPATH=/opt/render/project/src FLASK_APP=app.py FLASK_ENV=production gunicorn app:app --timeout 120 --workers 4 --log-level debug --preload
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -52,7 +52,7 @@ services:
         value: /opt/render/project/src
       - key: LOG_LEVEL
         value: DEBUG
-    healthCheckPath: /
+    healthCheckPath: /health
     autoDeploy: true
     databases:
       - name: encypherist_db
