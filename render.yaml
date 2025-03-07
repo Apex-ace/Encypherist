@@ -6,7 +6,7 @@ services:
     startCommand: python init_db.py && gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.0
+        value: 3.11.0
       - key: DATABASE_URL
         fromDatabase:
           name: encypherist_db
@@ -20,4 +20,5 @@ services:
     databases:
       - name: encypherist_db
         databaseName: encypherist
-        user: encypherist 
+        user: encypherist
+        plan: free 
