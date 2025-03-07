@@ -196,6 +196,32 @@ def ensure_db_ready():
         logger.error(f"Error checking database: {str(e)}")
         return False
 
+def create_admin_user(username, password):
+    """Create an admin user if it doesn't exist"""
+    try:
+        with app.app_context():
+            # Check if admin user exists
+            admin = User.query.filter_by(username=username).first()
+            
+            if not admin:
+                # Create new admin user
+                admin = User(
+                    username=username,
+                    password=generate_password_hash(password),
+                    role='admin'
+                )
+                db.session.add(admin)
+                db.session.commit()
+                logger.info(f"Admin user {username} created successfully")
+            else:
+                # Update existing admin user's password
+                admin.password = generate_password_hash(password)
+                db.session.commit()
+                logger.info(f"Admin user {username} password updated")
+    except Exception as e:
+        logger.error(f"Error creating/updating admin user: {str(e)}")
+        db.session.rollback()
+
 def init_app():
     """Initialize the application and ensure database is ready"""
     logger.info("Initializing application...")
@@ -210,6 +236,12 @@ def init_app():
             if not os.path.exists(dir_path):
                 os.makedirs(dir_path)
                 logger.info(f"Created directory: {dir_path}")
+        
+        # Create admin user
+        create_admin_user(
+            username='admin@gmail.com',
+            password='admin@123#'
+        )
         
         logger.info("Application initialization completed successfully")
         return True
@@ -1115,32 +1147,8 @@ def admin_logout():
     logout_user()
     return redirect(url_for('admin_login'))
 
-def create_admin_user(username, password):
-    """Create an admin user if it doesn't exist"""
-    try:
-        with app.app_context():
-            admin = User.query.filter_by(username=username).first()
-            if not admin:
-                admin = User(
-                    username=username,
-                    password=generate_password_hash(password),
-                    role='admin'
-                )
-                db.session.add(admin)
-                db.session.commit()
-                logger.info(f"Admin user {username} created successfully")
-            else:
-                logger.info(f"Admin user {username} already exists")
-    except Exception as e:
-        logger.error(f"Error creating admin user: {str(e)}")
-        db.session.rollback()
-
-# Create default admin user during initialization
-with app.app_context():
-    create_admin_user(
-        username='admin@gmail.com',
-        password='admin@123#'
-    )
+# Initialize the application
+init_app()
 
 @app.route('/health')
 def health_check():
