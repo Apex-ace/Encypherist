@@ -277,23 +277,18 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        remember = request.form.get('remember') == 'on'
         
         if not username or not password:
             flash('Please provide both username and password', 'error')
             return redirect(url_for('login'))
             
         user = User.query.filter_by(username=username).first()
-
+        
         if user and check_password_hash(user.password, password):
-            login_user(user, remember=True)
-            next_page = request.args.get('next')
+            login_user(user, remember=remember)
             flash('Logged in successfully!', 'success')
-            
-            # Redirect admin users to admin dashboard
-            if user.role == 'admin':
-                return redirect(url_for('admin_dashboard'))
-            
-            return redirect(next_page) if next_page else redirect(url_for('home'))
+            return redirect(url_for('dashboard'))
         
         flash('Invalid username or password', 'error')
         return redirect(url_for('login'))
@@ -1097,9 +1092,9 @@ def admin_login():
             flash('Please provide the admin password', 'error')
             return redirect(url_for('admin_login'))
             
-        # Use fixed admin username
-        admin_username = 'admin'
-        user = User.query.filter_by(username=admin_username).first()
+        # Use fixed admin email
+        admin_email = 'admin@gmail.com'
+        user = User.query.filter_by(username=admin_email).first()
 
         if user and check_password_hash(user.password, password) and user.role == 'admin':
             login_user(user, remember=True)
@@ -1143,8 +1138,8 @@ def create_admin_user(username, password):
 # Create default admin user during initialization
 with app.app_context():
     create_admin_user(
-        username=os.getenv('ADMIN_USERNAME', 'admin'),
-        password=os.getenv('ADMIN_PASSWORD', 'admin123')
+        username='admin@gmail.com',
+        password='admin@123#'
     )
 
 @app.route('/health')
