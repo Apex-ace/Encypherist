@@ -68,7 +68,7 @@ def init_db():
                 logger.info("Creating admin user...")
                 admin = User(
                     email='admin@gmail.com',
-                    password=generate_password_hash('123456789'),
+                    password=generate_password_hash('admin@123#'),
                     role='admin',
                     name='Admin User'
                 )
