@@ -1,18 +1,12 @@
-from app import app, db
-from models import User, Event, Booking, Payment, Message, Conversation
+from app import app, db, User, Event, Booking, Payment, Message, Conversation
 import os
 from werkzeug.security import generate_password_hash
-from flask_migrate import upgrade
 
 def init_db():
     print("Starting database initialization...")
     try:
         # Create all tables
         with app.app_context():
-            # Run any pending migrations
-            upgrade()
-            print("Applied database migrations")
-            
             # Create all tables if they don't exist
             db.create_all()
             print("Created all tables")

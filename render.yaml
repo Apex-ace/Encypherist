@@ -2,10 +2,7 @@ services:
   - type: web
     name: encypherist
     env: python
-    buildCommand: |
-      pip install -r requirements.txt
-      flask db init || true
-      flask db migrate -m "Initial migration" || true
+    buildCommand: pip install -r requirements.txt
     startCommand: python init_db.py && gunicorn app:app --timeout 120 --workers 4
     envVars:
       - key: PYTHON_VERSION
