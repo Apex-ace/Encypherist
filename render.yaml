@@ -8,10 +8,16 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.0
       - key: DATABASE_URL
-        value: postgres://postgres:postgres@localhost:5432/encypherist
+        fromDatabase:
+          name: encypherist_db
+          property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: FLASK_ENV
         value: production
     healthCheckPath: /
-    autoDeploy: true 
+    autoDeploy: true
+    databases:
+      - name: encypherist_db
+        databaseName: encypherist
+        user: encypherist 
