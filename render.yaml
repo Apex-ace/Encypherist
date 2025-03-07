@@ -4,8 +4,10 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: |
+      echo "Starting database initialization..."
       python init_db.py || exit 1
-      gunicorn app:app --timeout 120 --workers 4 --log-level debug
+      echo "Database initialization completed. Starting application..."
+      FLASK_APP=app.py FLASK_ENV=production gunicorn app:app --timeout 120 --workers 4 --log-level debug
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -39,6 +41,14 @@ services:
         value: 1800
       - key: SQLALCHEMY_TRACK_MODIFICATIONS
         value: false
+      - key: SQLALCHEMY_DATABASE_URI
+        fromDatabase:
+          name: encypherist_db
+          property: connectionString
+      - key: PYTHONUNBUFFERED
+        value: true
+      - key: PYTHONPATH
+        value: /opt/render/project/src
     healthCheckPath: /
     autoDeploy: true
     databases:
