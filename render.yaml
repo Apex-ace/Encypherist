@@ -5,7 +5,7 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       python init_db.py
-    startCommand: gunicorn app:app
+    startCommand: python init_db.py && gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
