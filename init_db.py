@@ -3,6 +3,7 @@ import os
 from werkzeug.security import generate_password_hash
 import logging
 import sys
+import time
 
 # Set up logging
 logging.basicConfig(
@@ -11,19 +12,36 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def wait_for_db(max_retries=5, delay=2):
+    """Wait for database to be ready"""
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})...")
+            db.engine.connect()
+            logger.info("Database connection successful!")
+            return True
+        except Exception as e:
+            logger.warning(f"Database connection attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
+                logger.info(f"Waiting {delay} seconds before next attempt...")
+                time.sleep(delay)
+            else:
+                logger.error("Failed to connect to database after maximum retries")
+                return False
+
 def init_db():
     logger.info("Starting database initialization...")
     try:
         # Ensure we're in the correct directory
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        logger.info(f"Working directory set to: {os.getcwd()}")
+        
+        # Wait for database to be ready
+        if not wait_for_db():
+            return False
         
         # Create all tables
         with app.app_context():
-            # Test database connection
-            logger.info("Testing database connection...")
-            db.engine.connect()
-            logger.info("Database connection successful")
-            
             # Drop all tables first to ensure clean state
             logger.info("Dropping existing tables...")
             db.drop_all()
