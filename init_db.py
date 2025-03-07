@@ -1,4 +1,4 @@
-from app import app, db, User, Event, Booking, Payment, Message, Conversation
+from app import app, db
 import os
 from werkzeug.security import generate_password_hash
 
@@ -7,9 +7,16 @@ def init_db():
     try:
         # Create all tables
         with app.app_context():
-            # Create all tables if they don't exist
+            # Drop all tables first to ensure clean state
+            db.drop_all()
+            print("Dropped existing tables")
+            
+            # Create all tables
             db.create_all()
             print("Created all tables")
+            
+            # Import models after tables are created
+            from app import User, Event, Booking, Payment, Message, Conversation
             
             # Create admin user if it doesn't exist
             admin = User.query.filter_by(email='admin@gmail.com').first()
