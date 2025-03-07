@@ -2,17 +2,18 @@ from app import app, db
 from models import User, Event, Booking, Payment, Message, Conversation
 import os
 from werkzeug.security import generate_password_hash
+from flask_migrate import upgrade
 
 def init_db():
     print("Starting database initialization...")
     try:
         # Create all tables
         with app.app_context():
-            # Drop existing tables to ensure clean state
-            db.drop_all()
-            print("Dropped existing tables")
+            # Run any pending migrations
+            upgrade()
+            print("Applied database migrations")
             
-            # Create all tables
+            # Create all tables if they don't exist
             db.create_all()
             print("Created all tables")
             
@@ -29,11 +30,24 @@ def init_db():
                 db.session.commit()
                 print("Created admin user")
             
+            # Create necessary directories if they don't exist
+            upload_dirs = ['static/uploads', 'static/images', 'static/posters']
+            for dir_path in upload_dirs:
+                if not os.path.exists(dir_path):
+                    os.makedirs(dir_path)
+                    print(f"Created directory: {dir_path}")
+            
             print("Database initialization completed successfully!")
             
     except Exception as e:
         print(f"Error during database initialization: {str(e)}")
-        raise e
+        # Don't raise the exception, just log it
+        return False
+    
+    return True
 
 if __name__ == '__main__':
-    init_db() 
+    success = init_db()
+    if not success:
+        print("Database initialization failed!")
+        exit(1) 
