@@ -48,7 +48,7 @@ login_manager.login_view = 'login'
 # Database Models
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    username = db.Column(db.Text, unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     profile_picture = db.Column(db.String(200))  # Store profile picture filename
@@ -225,26 +225,31 @@ def create_admin_user(username, password):
 def init_app():
     """Initialize the application and ensure database is ready"""
     logger.info("Initializing application...")
-    with app.app_context():
-        if not ensure_db_ready():
-            logger.error("Failed to initialize database")
-            return False
-        
-        # Create necessary directories
-        upload_dirs = ['static/uploads', 'static/images', 'static/posters']
-        for dir_path in upload_dirs:
-            if not os.path.exists(dir_path):
-                os.makedirs(dir_path)
-                logger.info(f"Created directory: {dir_path}")
-        
-        # Create admin user
-        create_admin_user(
-            username='admin@gmail.com',
-            password='admin@123#'
-        )
-        
-        logger.info("Application initialization completed successfully")
-        return True
+    try:
+        with app.app_context():
+            # Create database tables
+            db.create_all()
+            logger.info("Database tables created successfully")
+            
+            # Create necessary directories
+            upload_dirs = ['static/uploads', 'static/images', 'static/posters']
+            for dir_path in upload_dirs:
+                if not os.path.exists(dir_path):
+                    os.makedirs(dir_path)
+                    logger.info(f"Created directory: {dir_path}")
+            
+            # Create admin user
+            create_admin_user(
+                username='admin@gmail.com',
+                password='admin@123#'
+            )
+            
+            logger.info("Application initialization completed successfully")
+            return True
+            
+    except Exception as e:
+        logger.error(f"Error during application initialization: {str(e)}")
+        return False
 
 @app.route('/')
 def landing():
@@ -306,26 +311,43 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        remember = request.form.get('remember') == 'on'
-        
-        if not username or not password:
-            flash('Please provide both username and password', 'error')
-            return redirect(url_for('login'))
+    try:
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            remember = request.form.get('remember') == 'on'
             
-        user = User.query.filter_by(username=username).first()
+            logger.info(f"Login attempt for username: {username}")
+            
+            if not username or not password:
+                logger.warning("Login attempt with missing credentials")
+                flash('Please provide both username and password', 'error')
+                return redirect(url_for('login'))
+            
+            try:
+                user = User.query.filter_by(username=username).first()
+                
+                if user and check_password_hash(user.password, password):
+                    login_user(user, remember=remember)
+                    logger.info(f"Successful login for user: {username}")
+                    flash('Logged in successfully!', 'success')
+                    return redirect(url_for('dashboard'))
+                
+                logger.warning(f"Failed login attempt for username: {username}")
+                flash('Invalid username or password', 'error')
+                return redirect(url_for('login'))
+                
+            except Exception as e:
+                logger.error(f"Database error during login: {str(e)}")
+                flash('An error occurred during login. Please try again.', 'error')
+                return redirect(url_for('login'))
         
-        if user and check_password_hash(user.password, password):
-            login_user(user, remember=remember)
-            flash('Logged in successfully!', 'success')
-            return redirect(url_for('dashboard'))
+        return render_template('login.html')
         
-        flash('Invalid username or password', 'error')
+    except Exception as e:
+        logger.error(f"Unexpected error in login route: {str(e)}")
+        flash('An unexpected error occurred. Please try again.', 'error')
         return redirect(url_for('login'))
-        
-    return render_template('login.html')
 
 @app.route('/logout', methods=['POST'])
 @login_required
