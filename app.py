@@ -16,6 +16,7 @@ from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import logging
 import time
+import sys
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -157,11 +158,22 @@ class Review(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@app.before_first_request
-def before_first_request():
-    """Ensure database is ready before handling any requests"""
+def init_app():
+    """Initialize the application and ensure database is ready"""
+    logger.info("Initializing application...")
     if not ensure_db_ready():
-        return jsonify({"error": "Database is not ready. Please try again later."}), 503
+        logger.error("Failed to initialize database")
+        return False
+    
+    # Create necessary directories
+    upload_dirs = ['static/uploads', 'static/images', 'static/posters']
+    for dir_path in upload_dirs:
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+            logger.info(f"Created directory: {dir_path}")
+    
+    logger.info("Application initialization completed successfully")
+    return True
 
 @app.route('/')
 def landing():
@@ -1683,6 +1695,11 @@ def ensure_db_ready():
     except Exception as e:
         logger.error(f"Error checking database: {str(e)}")
         return False
+
+# Initialize the application
+if not init_app():
+    logger.error("Application initialization failed")
+    sys.exit(1)
 
 # Initialize database tables
 with app.app_context():

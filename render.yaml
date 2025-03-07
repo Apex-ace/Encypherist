@@ -4,11 +4,11 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: |
-      echo "Starting database initialization..."
+      echo "Starting application initialization..."
       cd /opt/render/project/src
-      PYTHONPATH=/opt/render/project/src LOG_LEVEL=DEBUG python init_db.py || exit 1
-      echo "Database initialization completed. Starting application..."
-      PYTHONPATH=/opt/render/project/src FLASK_APP=app.py FLASK_ENV=production gunicorn app:app --timeout 120 --workers 4 --log-level debug --preload
+      PYTHONPATH=/opt/render/project/src LOG_LEVEL=DEBUG python -c "from app import init_app; init_app()" || exit 1
+      echo "Application initialization completed. Starting server..."
+      PYTHONPATH=/opt/render/project/src FLASK_APP=app.py FLASK_ENV=production gunicorn app:app --timeout 120 --workers 4 --log-level debug
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
