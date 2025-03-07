@@ -4,7 +4,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -22,9 +21,11 @@ wheels/
 *.egg
 
 # Virtual Environment
+.env
+.venv
+env/
 venv/
 ENV/
-.env
 
 # IDE
 .idea/
@@ -40,12 +41,15 @@ ENV/
 *.log
 
 # Local development
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Uploaded files
-static/uploads/*
-!static/uploads/.gitkeep 
+static/uploads/
+static/tickets/
+
+# System files
+.DS_Store
+Thumbs.db 

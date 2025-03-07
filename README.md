@@ -1,46 +1,43 @@
 # Encypherist - Event Management System
 
-A modern event management system built with Flask, featuring user authentication, event creation, booking management, and real-time messaging.
+A modern event management system built with Flask, featuring user roles, event creation, booking management, and real-time notifications.
 
 ## Features
 
-- User Authentication (Student/Organizer)
+- User Authentication (Admin, Organizer, Student)
 - Event Creation and Management
 - Ticket Booking System
-- Real-time Messaging
+- Group Booking Support
+- Real-time Notifications
+- Messaging System
+- Review and Rating System
+- Admin Dashboard
 - Profile Management
-- Responsive Design with Modern UI
-- Secure Payment Integration
 
 ## Tech Stack
 
-- Python 3.8+
+- Python 3.11
 - Flask
 - SQLAlchemy
+- PostgreSQL
+- Gunicorn
 - Flask-Login
 - Flask-WTF
-- SQLite (Development) / PostgreSQL (Production)
-- HTML5, CSS3, JavaScript
-- TailwindCSS
-
-## Prerequisites
-
-- Python 3.8 or higher
-- pip (Python package manager)
-- Git
+- QR Code Generation
+- PDF Generation
 
 ## Local Development Setup
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/encypherist.git
-cd encypherist
+git clone https://github.com/Apex-ace/Encypherist.git
+cd Encypherist
 ```
 
-2. Create and activate a virtual environment:
+2. Create and activate virtual environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -48,75 +45,49 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file in the root directory:
-```env
-FLASK_APP=app.py
-FLASK_ENV=development
-SECRET_KEY=your-secret-key
-DATABASE_URL=sqlite:///encypherist.db
+4. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
 5. Initialize the database:
 ```bash
-flask db init
-flask db migrate
-flask db upgrade
+python init_db.py
 ```
 
 6. Run the development server:
 ```bash
-flask run
+python app.py
 ```
-
-The application will be available at `http://localhost:5000`
 
 ## Deployment on Render
 
 1. Create a new Web Service on Render
 2. Connect your GitHub repository
-3. Configure the following settings:
-   - Build Command: `pip install -r requirements.txt`
+3. Configure the following:
+   - Build Command: `pip install -r requirements.txt && python init_db.py`
    - Start Command: `gunicorn app:app`
-   - Environment Variables:
-     ```
-     FLASK_APP=app.py
-     FLASK_ENV=production
-     SECRET_KEY=your-secret-key
-     DATABASE_URL=your-postgresql-url
-     ```
+   - Python Version: 3.11.0
 
-## Project Structure
+4. Add Environment Variables:
+   - `FLASK_ENV`: production
+   - `FLASK_DEBUG`: 1
+   - `SQLALCHEMY_ECHO`: true
+   - `SECRET_KEY`: (Generate a secure key)
+   - `DATABASE_URL`: (Will be automatically added by Render)
 
-```
-encypherist/
-├── app/
-│   ├── __init__.py
-│   ├── models/
-│   ├── routes/
-│   ├── static/
-│   └── templates/
-├── migrations/
-├── .env
-├── .gitignore
-├── app.py
-├── config.py
-├── requirements.txt
-└── README.md
-```
+5. Create a PostgreSQL Database:
+   - Name: encypherist_db
+   - Database: encypherist
+   - User: encypherist
+   - Plan: Free
 
-## Contributing
+## Default Admin Credentials
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/improvement`)
-3. Make your changes
-4. Commit your changes (`git commit -am 'Add new feature'`)
-5. Push to the branch (`git push origin feature/improvement`)
-6. Create a Pull Request
+- Email: admin@gmail.com
+- Password: 123456789
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support, please open an issue in the GitHub repository or contact the maintainers. 
+This project is licensed under the MIT License - see the LICENSE file for details. 
