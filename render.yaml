@@ -6,7 +6,7 @@ services:
     startCommand: |
       echo "Starting application initialization..."
       cd /opt/render/project/src
-      PYTHONPATH=/opt/render/project/src LOG_LEVEL=DEBUG python -c "from app import init_app; init_app()" || exit 1
+      PYTHONPATH=/opt/render/project/src LOG_LEVEL=DEBUG FLASK_APP=app.py FLASK_ENV=production python -c "from app import app, db; app.app_context().push(); db.create_all()" || exit 1
       echo "Application initialization completed. Starting server..."
       PYTHONPATH=/opt/render/project/src FLASK_APP=app.py FLASK_ENV=production gunicorn app:app --timeout 120 --workers 4 --log-level debug
     envVars:

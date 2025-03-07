@@ -158,22 +158,61 @@ class Review(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+def wait_for_db(max_retries=5, delay=2):
+    """Wait for database to be ready"""
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})...")
+            with app.app_context():
+                db.engine.connect()
+            logger.info("Database connection successful!")
+            return True
+        except Exception as e:
+            logger.warning(f"Database connection attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
+                logger.info(f"Waiting {delay} seconds before next attempt...")
+                time.sleep(delay)
+            else:
+                logger.error("Failed to connect to database after maximum retries")
+                return False
+
+def ensure_db_ready():
+    """Ensure database is ready before starting the application"""
+    if not wait_for_db():
+        logger.error("Database is not ready. Exiting...")
+        return False
+    
+    try:
+        with app.app_context():
+            # Test if tables exist
+            inspector = db.inspect(db.engine)
+            tables = inspector.get_table_names()
+            if not tables:
+                logger.error("No tables found in database. Please run database initialization first.")
+                return False
+            logger.info(f"Database is ready with tables: {tables}")
+            return True
+    except Exception as e:
+        logger.error(f"Error checking database: {str(e)}")
+        return False
+
 def init_app():
     """Initialize the application and ensure database is ready"""
     logger.info("Initializing application...")
-    if not ensure_db_ready():
-        logger.error("Failed to initialize database")
-        return False
-    
-    # Create necessary directories
-    upload_dirs = ['static/uploads', 'static/images', 'static/posters']
-    for dir_path in upload_dirs:
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-            logger.info(f"Created directory: {dir_path}")
-    
-    logger.info("Application initialization completed successfully")
-    return True
+    with app.app_context():
+        if not ensure_db_ready():
+            logger.error("Failed to initialize database")
+            return False
+        
+        # Create necessary directories
+        upload_dirs = ['static/uploads', 'static/images', 'static/posters']
+        for dir_path in upload_dirs:
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+                logger.info(f"Created directory: {dir_path}")
+        
+        logger.info("Application initialization completed successfully")
+        return True
 
 @app.route('/')
 def landing():
@@ -1660,63 +1699,28 @@ def book_group(event_id):
     
     return render_template('group_booking.html', event=event)
 
-def wait_for_db(max_retries=5, delay=2):
-    """Wait for database to be ready"""
-    for attempt in range(max_retries):
-        try:
-            logger.info(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})...")
-            db.engine.connect()
-            logger.info("Database connection successful!")
-            return True
-        except Exception as e:
-            logger.warning(f"Database connection attempt {attempt + 1} failed: {str(e)}")
-            if attempt < max_retries - 1:
-                logger.info(f"Waiting {delay} seconds before next attempt...")
-                time.sleep(delay)
-            else:
-                logger.error("Failed to connect to database after maximum retries")
-                return False
-
-def ensure_db_ready():
-    """Ensure database is ready before starting the application"""
-    if not wait_for_db():
-        logger.error("Database is not ready. Exiting...")
-        return False
-    
-    try:
-        # Test if tables exist
-        inspector = db.inspect(db.engine)
-        tables = inspector.get_table_names()
-        if not tables:
-            logger.error("No tables found in database. Please run database initialization first.")
-            return False
-        logger.info(f"Database is ready with tables: {tables}")
-        return True
-    except Exception as e:
-        logger.error(f"Error checking database: {str(e)}")
-        return False
+# Initialize database tables
+with app.app_context():
+    db.create_all()
 
 # Initialize the application
 if not init_app():
     logger.error("Application initialization failed")
     sys.exit(1)
 
-# Initialize database tables
-with app.app_context():
-    db.create_all()
-
 @app.route('/health')
 def health_check():
     """Health check endpoint to verify database connectivity"""
     try:
-        # Test database connection
-        db.engine.connect()
-        # Check if tables exist
-        inspector = db.inspect(db.engine)
-        tables = inspector.get_table_names()
-        if not tables:
-            return jsonify({"status": "error", "message": "No tables found"}), 503
-        return jsonify({"status": "healthy", "tables": tables}), 200
+        with app.app_context():
+            # Test database connection
+            db.engine.connect()
+            # Check if tables exist
+            inspector = db.inspect(db.engine)
+            tables = inspector.get_table_names()
+            if not tables:
+                return jsonify({"status": "error", "message": "No tables found"}), 503
+            return jsonify({"status": "healthy", "tables": tables}), 200
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 503
