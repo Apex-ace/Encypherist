@@ -2,16 +2,28 @@ from app import app, db
 import os
 from werkzeug.security import generate_password_hash
 import logging
+import sys
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 def init_db():
     logger.info("Starting database initialization...")
     try:
+        # Ensure we're in the correct directory
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        
         # Create all tables
         with app.app_context():
+            # Test database connection
+            logger.info("Testing database connection...")
+            db.engine.connect()
+            logger.info("Database connection successful")
+            
             # Drop all tables first to ensure clean state
             logger.info("Dropping existing tables...")
             db.drop_all()
@@ -21,6 +33,12 @@ def init_db():
             logger.info("Creating tables...")
             db.create_all()
             logger.info("Created all tables")
+            
+            # Verify tables were created
+            logger.info("Verifying table creation...")
+            inspector = db.inspect(db.engine)
+            tables = inspector.get_table_names()
+            logger.info(f"Created tables: {tables}")
             
             # Import models after tables are created
             from app import User, Event, Booking, Payment, Message, Conversation
@@ -59,7 +77,11 @@ def init_db():
         return False
 
 if __name__ == '__main__':
+    logger.info(f"Python version: {sys.version}")
+    logger.info(f"Current working directory: {os.getcwd()}")
+    logger.info(f"Database URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    
     success = init_db()
     if not success:
         logger.error("Database initialization failed!")
-        exit(1) 
+        sys.exit(1) 

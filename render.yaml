@@ -5,7 +5,8 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: |
       echo "Starting database initialization..."
-      PYTHONPATH=/opt/render/project/src python init_db.py || exit 1
+      cd /opt/render/project/src
+      PYTHONPATH=/opt/render/project/src LOG_LEVEL=DEBUG python init_db.py || exit 1
       echo "Database initialization completed. Starting application..."
       PYTHONPATH=/opt/render/project/src FLASK_APP=app.py FLASK_ENV=production gunicorn app:app --timeout 120 --workers 4 --log-level debug
     envVars:
