@@ -1,0 +1,19 @@
+<div class="flex space-x-4">
+    {% if event.tickets_remaining > 0 %}
+        <a href="{{ url_for('book_event', event_id=event.id) }}" 
+           class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">
+            Book Now
+        </a>
+        {% if event.is_group_event %}
+            <a href="{{ url_for('book_group', event_id=event.id) }}"
+               class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center">
+                <i class="fas fa-users mr-2"></i>
+                Group Booking
+            </a>
+        {% endif %}
+    {% else %}
+        <button disabled class="bg-gray-600 text-gray-300 font-semibold py-3 px-6 rounded-lg cursor-not-allowed">
+            Sold Out
+        </button>
+    {% endif %}
+</div> 

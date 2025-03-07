@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encypherist - Messages</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(45deg, #000000, #1a1a1a);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(15, 164, 175, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(175, 221, 229, 0.15) 0%, transparent 25%);
+            animation: bgAnimation 15s ease infinite alternate;
+        }
+
+        .glass {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(175, 221, 229, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(15, 164, 175, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: gradient 8s ease infinite;
+        }
+
+        .chat-container {
+            height: calc(100vh - 180px);
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            word-wrap: break-word;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .message-sent {
+            background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
+            border-radius: 20px 20px 0 20px;
+            align-self: flex-end;
+            border: 1px solid rgba(175, 221, 229, 0.3);
+            background-size: 300% 300%;
+            animation: gradient 8s ease infinite;
+        }
+
+        .message-received {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px 20px 20px 0;
+            align-self: flex-start;
+            border: 1px solid rgba(175, 221, 229, 0.3);
+        }
+
+        .contact-list-item {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .contact-list-item:hover {
+            background: rgba(15, 164, 175, 0.1);
+            border-left-color: #AFDDE5;
+        }
+
+        .contact-list-item.active {
+            background: rgba(15, 164, 175, 0.1);
+            border-left-color: #AFDDE5;
+        }
+
+        .online-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #4ade80;
+            border: 2px solid #111827;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .message-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(175, 221, 229, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .message-input:focus {
+            background: rgba(15, 164, 175, 0.1);
+            border-color: #AFDDE5;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(175, 221, 229, 0.2);
+        }
+
+        .send-button {
+            background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(175, 221, 229, 0.3);
+            background-size: 300% 300%;
+            animation: gradient 8s ease infinite;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(15, 164, 175, 0.4);
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .search-input {
+            background: rgba(31, 41, 55, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .search-input:focus {
+            background: rgba(55, 65, 81, 0.7);
+            border-color: #e5e7eb;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(229, 231, 235, 0.2);
+        }
+
+        .scroll-container {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(55, 65, 81, 0.7) rgba(17, 24, 39, 0.7);
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: rgba(17, 24, 39, 0.7);
+            border-radius: 3px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(55, 65, 81, 0.7);
+            border-radius: 3px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(75, 85, 99, 0.7);
+        }
+
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(15, 164, 175, 0.1);
+            color: #AFDDE5;
+        }
+
+        .nav-link.active {
+            background: rgba(15, 164, 175, 0.1);
+            border: 1px solid rgba(175, 221, 229, 0.3);
+            color: #AFDDE5;
+        }
+
+        /* Message Time Badge */
+        .time-badge {
+            background: rgba(17, 24, 39, 0.7);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Unread Message Indicator */
+        .unread-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            margin-left: 8px;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- Background Pattern -->
+    <div class="fixed inset-0 opacity-30">
+        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23333333\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold gradient-text">Encypherist</h1>
+                <div class="flex items-center space-x-8">
+                    <a href="{{ url_for('home') }}" class="nav-link hover:text-gray-300 transition flex items-center">
+                        <i class="fas fa-home mr-2"></i> Events
+                    </a>
+                    <a href="{{ url_for('create_event') }}" class="nav-link hover:text-gray-300 transition flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Create Event
+                    </a>
+                    <a href="{{ url_for('messages') }}" class="nav-link active text-white transition flex items-center">
+                        <i class="fas fa-envelope mr-2"></i> Messages
+                    </a>
+                    <a href="{{ url_for('notifications') }}" class="nav-link hover:text-gray-300 transition flex items-center">
+                        <i class="fas fa-bell mr-2"></i> Notifications
+                    </a>
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 hover:text-gray-300 transition p-2 rounded-lg">
+                            <div class="relative">
+                                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) if current_user.profile_picture else 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}"
+                                     alt="Profile"
+                                     class="w-10 h-10 rounded-full border-2 border-gray-700">
+                                <div class="online-indicator"></div>
+                            </div>
+                            <span>{{ current_user.username }}</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg glass hidden group-hover:block">
+                            <a href="{{ url_for('profile') }}" class="flex items-center px-4 py-3 hover:bg-gray-700 hover:bg-opacity-50 rounded-t-lg">
+                                <i class="fas fa-user mr-2"></i> Profile
+                            </a>
+                            <a href="{{ url_for('edit_profile') }}" class="flex items-center px-4 py-3 hover:bg-gray-700 hover:bg-opacity-50">
+                                <i class="fas fa-edit mr-2"></i> Edit Profile
+                            </a>
+                            <a href="{{ url_for('notification_preferences') }}" class="flex items-center px-4 py-3 hover:bg-gray-700 hover:bg-opacity-50">
+                                <i class="fas fa-cog mr-2"></i> Settings
+                            </a>
+                            <form action="{{ url_for('logout') }}" method="POST" class="block">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="w-full flex items-center px-4 py-3 hover:bg-gray-700 hover:bg-opacity-50 rounded-b-lg text-red-400 hover:text-red-300">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 pt-24 pb-12">
+        <div class="glass chat-container">
+            <div class="flex h-full">
+                <!-- Contacts List -->
+                <div class="w-1/4 border-r border-gray-700">
+                    <div class="p-4">
+                        <div class="relative mb-4">
+                            <input type="text" placeholder="Search contacts..." class="w-full search-input py-2 px-4 pl-10 text-sm">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                        <div class="scroll-container overflow-y-auto h-[calc(100vh-280px)]">
+                            {% if conversations %}
+                                {% for user_id, conv in conversations.items() %}
+                                <a href="{{ url_for('conversation', user_id=user_id) }}" class="block">
+                                    <div class="contact-list-item p-3 cursor-pointer">
+                                        <div class="flex items-center">
+                                            <div class="relative">
+                                                <img src="{{ url_for('static', filename='uploads/' + conv['user'].profile_picture) if conv['user'].profile_picture else 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}"
+                                                     alt="{{ conv['user'].username }}"
+                                                     class="w-12 h-12 rounded-full border border-gray-700">
+                                            </div>
+                                            <div class="ml-3 flex-1">
+                                                <div class="flex justify-between items-start">
+                                                    <h3 class="font-semibold">{{ conv['user'].username }}</h3>
+                                                    <span class="time-badge">{{ conv['last_message'].timestamp.strftime('%H:%M') }}</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <p class="text-sm text-gray-400 truncate">{{ conv['last_message'].content }}</p>
+                                                    {% if conv['unread'] > 0 %}
+                                                    <div class="unread-indicator"></div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-8 text-gray-400">
+                                    <p>No conversations yet</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="w-3/4 flex flex-col">
+                    {% if other_user %}
+                    <!-- Chat Header -->
+                    <div class="p-4 border-b border-gray-700">
+                        <div class="flex items-center">
+                            <div class="relative">
+                                <img src="{{ url_for('static', filename='uploads/' + other_user.profile_picture) if other_user.profile_picture else 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}"
+                                     alt="{{ other_user.username }}"
+                                     class="w-12 h-12 rounded-full border border-gray-700">
+                            </div>
+                            <div class="ml-3">
+                                <h2 class="font-semibold">{{ other_user.username }}</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="flex-1 p-4 overflow-y-auto scroll-container">
+                        <div class="flex flex-col space-y-4">
+                            {% if messages %}
+                                {% for message in messages %}
+                                <div class="message-bubble {% if message.sender_id == current_user.id %}message-sent{% else %}message-received{% endif %} p-3">
+                                    <div class="flex items-start">
+                                        {% if message.sender_id != current_user.id %}
+                                        <img src="{{ url_for('static', filename='uploads/' + other_user.profile_picture) if other_user.profile_picture else 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}"
+                                             alt="{{ other_user.username }}"
+                                             class="w-6 h-6 rounded-full border border-gray-700 mr-2">
+                                        {% endif %}
+                                        <div>
+                                            <p class="text-sm">{{ message.content }}</p>
+                                            <p class="text-xs text-gray-400 mt-1">{{ message.timestamp.strftime('%H:%M') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-8 text-gray-400">
+                                    <p>No messages yet</p>
+                                    <p class="text-sm mt-2">Start the conversation!</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Message Input -->
+                    <div class="p-4 border-t border-gray-700">
+                        <form action="{{ url_for('send_message', user_id=other_user.id) }}" method="POST" class="flex items-center space-x-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="text" 
+                                   name="content"
+                                   placeholder="Type your message..." 
+                                   class="flex-1 message-input py-3 px-4 text-sm"
+                                   required>
+                            <button type="submit" class="send-button p-3 text-white">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="flex-1 flex items-center justify-center">
+                        <div class="text-center text-gray-400">
+                            <i class="fas fa-comments text-4xl mb-4"></i>
+                            <p>Select a conversation to start messaging</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Scroll to bottom of messages
+        function scrollToBottom() {
+            const messagesContainer = document.querySelector('.scroll-container');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Call on page load
+        scrollToBottom();
+
+        // Optional: Smooth scroll animation
+        document.querySelectorAll('.scroll-container').forEach(container => {
+            container.style.scrollBehavior = 'smooth';
+        });
+    </script>
+</body>
+</html> 

@@ -16,6 +16,7 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -23,15 +24,13 @@ var/
 # Virtual Environment
 venv/
 ENV/
+.env
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# Environment variables
-.env
 
 # Database
 *.db
@@ -40,10 +39,13 @@ ENV/
 # Logs
 *.log
 
-# Uploads
-static/uploads/*
-!static/uploads/.gitkeep
-
 # Local development
 .DS_Store
-Thumbs.db 
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Uploaded files
+static/uploads/*
+!static/uploads/.gitkeep 

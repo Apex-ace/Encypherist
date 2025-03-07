@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encypherist - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #000;
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, #000000, #1a1a1a);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(15, 164, 175, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(175, 221, 229, 0.15) 0%, transparent 25%);
+            animation: bgAnimation 15s ease infinite alternate;
+        }
+
+        @keyframes bgAnimation {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+            100% {
+                transform: scale(1.2) rotate(5deg);
+            }
+        }
+
+        .glass {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(175, 221, 229, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(15, 164, 175, 0.2);
+        }
+
+        .input-field {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(175, 221, 229, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            width: 100%;
+            color: white;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-field:focus {
+            border-color: rgba(15, 164, 175, 0.5);
+            box-shadow: 0 0 0 2px rgba(15, 164, 175, 0.25);
+            outline: none;
+        }
+
+        .input-field.error {
+            border-color: rgba(239, 68, 68, 0.5);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: gradient 8s ease infinite;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            color: white;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            background-size: 300% 300%;
+            animation: gradient 8s ease infinite;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(15, 164, 175, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    
+    <div class="min-h-screen flex flex-col items-center justify-center relative z-10 px-4">
+        <nav class="w-full flex justify-between items-center py-4 px-6 fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-20">
+            <a href="{{ url_for('landing') }}" class="text-2xl font-bold gradient-text">Encypherist</a>
+            <a href="{{ url_for('landing') }}" class="text-sm text-gray-300 hover:text-[#AFDDE5] transition-colors">← Back to Home</a>
+        </nav>
+
+        <div class="glass w-full max-w-md">
+            <h2 class="text-3xl font-bold mb-6 text-center gradient-text">Welcome Back!</h2>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-lg bg-red-500 bg-opacity-20 text-red-200 text-center text-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('login') }}" class="space-y-4" id="loginForm" onsubmit="return validateForm()">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div>
+                    <input type="email" id="username" name="username" required
+                           class="input-field"
+                           pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                           placeholder="Enter your Gmail address">
+                    <div class="error-message" id="emailError">Please enter a valid Gmail address (example@gmail.com)</div>
+                </div>
+                
+                <div>
+                    <input type="password" id="password" name="password" required
+                           class="input-field"
+                           minlength="6"
+                           placeholder="Enter your password">
+                    <div class="error-message" id="passwordError">Password must be at least 6 characters long</div>
+                </div>
+
+                <div class="flex items-center justify-between text-sm mb-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="mr-2">
+                        <span class="text-gray-300">Remember me</span>
+                    </label>
+                    <a href="#" class="text-[#AFDDE5] hover:text-[#0FA4AF] transition-colors">Forgot password?</a>
+                </div>
+
+                <div class="mt-6">
+                    <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-[#0FA4AF] to-[#AFDDE5] text-white py-2 px-4 rounded-md hover:from-[#0E8F99] hover:to-[#9ED1D9] focus:outline-none focus:ring-2 focus:ring-[#0FA4AF] focus:ring-offset-2 transition-all duration-300">
+                        Sign in
+                    </button>
+                </div>
+            </form>
+
+            <p class="mt-8 text-center text-gray-400">
+                Don't have an account? 
+                <a href="{{ url_for('register') }}" class="text-[#AFDDE5] hover:text-[#0FA4AF] transition-colors">Register here</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const emailInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function validateEmail(email) {
+            const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+            return gmailRegex.test(email);
+        }
+
+        function showError(input, errorElement, message) {
+            input.classList.add('error');
+            errorElement.style.display = 'block';
+            errorElement.textContent = message;
+        }
+
+        function hideError(input, errorElement) {
+            input.classList.remove('error');
+            errorElement.style.display = 'none';
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            // Email validation
+            if (!validateEmail(emailInput.value)) {
+                showError(emailInput, emailError, 'Please enter a valid Gmail address (example@gmail.com)');
+                isValid = false;
+            } else {
+                hideError(emailInput, emailError);
+            }
+
+            // Password validation
+            if (passwordInput.value.length < 6) {
+                showError(passwordInput, passwordError, 'Password must be at least 6 characters long');
+                isValid = false;
+            } else {
+                hideError(passwordInput, passwordError);
+            }
+
+            return isValid;
+        }
+
+        // Real-time validation
+        emailInput.addEventListener('input', () => {
+            if (validateEmail(emailInput.value)) {
+                hideError(emailInput, emailError);
+            } else {
+                showError(emailInput, emailError, 'Please enter a valid Gmail address (example@gmail.com)');
+            }
+        });
+
+        passwordInput.addEventListener('input', () => {
+            if (passwordInput.value.length >= 6) {
+                hideError(passwordInput, passwordError);
+            } else {
+                showError(passwordInput, passwordError, 'Password must be at least 6 characters long');
+            }
+        });
+    </script>
+</body>
+</html>

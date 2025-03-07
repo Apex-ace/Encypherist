@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encypherist - College Event Ticket Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0FA4AF;
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #vanta-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0FA4AF 0%, #AFDDE5 100%);
+        }
+
+        .neon-text {
+            text-shadow: 0 0 10px rgba(175, 221, 229, 0.5),
+                         0 0 20px rgba(175, 221, 229, 0.3),
+                         0 0 30px rgba(175, 221, 229, 0.2);
+        }
+
+        .glass {
+            background: rgba(15, 164, 175, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(175, 221, 229, 0.2);
+            border-radius: 24px;
+        }
+
+        .glass-card {
+            background: rgba(15, 164, 175, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(175, 221, 229, 0.2);
+            border-radius: 24px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-10px) rotateX(10deg) rotateY(10deg);
+            border-color: rgba(175, 221, 229, 0.4);
+            box-shadow: 
+                0 0 20px rgba(175, 221, 229, 0.2),
+                0 0 40px rgba(175, 221, 229, 0.1);
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #0FA4AF, #AFDDE5, #0FA4AF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: gradient 8s ease infinite;
+        }
+
+        .gradient-border {
+            position: relative;
+            border-radius: 24px;
+            padding: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
+            border: none;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background-size: 300% 300%;
+            animation: gradient 8s ease infinite;
+            box-shadow: 0 0 20px rgba(175, 221, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 30px rgba(175, 221, 229, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(175, 221, 229, 0.1);
+            border: 1px solid rgba(175, 221, 229, 0.3);
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(175, 221, 229, 0.2);
+            transform: translateY(-5px) scale(1.05);
+            border-color: rgba(175, 221, 229, 0.4);
+            box-shadow: 0 0 20px rgba(175, 221, 229, 0.2);
+        }
+
+        .event-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card {
+            background: rgba(175, 221, 229, 0.1);
+            border: 1px solid rgba(175, 221, 229, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(175, 221, 229, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(175, 221, 229, 0.2);
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0px) rotateY(0deg); }
+            50% { transform: translateY(-20px) rotateY(180deg); }
+            100% { transform: translateY(0px) rotateY(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="vanta-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/" class="text-3xl font-bold gradient-text tracking-wider">Encypherist</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#featured" class="hover:text-blue-400 transition neon-text">Events</a>
+                    <a href="#how-it-works" class="hover:text-blue-400 transition neon-text">How It Works</a>
+                 
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
+                        <a href="{{ url_for('register') }}" class="btn-primary">Register</a>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center pt-20 relative">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <h1 class="text-6xl md:text-8xl font-extrabold leading-tight tracking-tighter">
+                        Experience
+                        <span class="gradient-text block">Events</span>
+                        The Tech World
+                    </h1>
+                    <p class="text-xl text-gray-400 leading-relaxed">
+                        Encypherist is focused on developing students' skills in computer science, AI, and machine learning. It likely involves activities such as workshops, hackathons, coding sessions, or other initiatives to help students enhance their technical knowledge.
+                    </p>
+                    <div class="flex flex-wrap gap-6">
+                        <a href="#featured" class="btn-primary group">
+                            <span class="inline-block transform group-hover:scale-110 transition-transform">
+                                Explore Events
+                            </span>
+                        </a>
+                        <a href="{{ url_for('register') }}?role=organizer" class="btn-secondary group">
+                            <span class="inline-block transform group-hover:scale-110 transition-transform">
+                                Create Event
+                            </span>
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-3 gap-6 mt-12">
+                        <div class="stat-card group">
+                            <h3 class="text-4xl font-bold gradient-text mb-2 transform group-hover:scale-110 transition-transform">15+</h3>
+                            <p class="text-gray-400">Active Events</p>
+                        </div>
+                        <div class="stat-card group">
+                            <h3 class="text-4xl font-bold gradient-text mb-2 transform group-hover:scale-110 transition-transform">100+</h3>
+                            <p class="text-gray-400">Happy Users</p>
+                        </div>
+                        <div class="stat-card group">
+                            <h3 class="text-4xl font-bold gradient-text mb-2 transform group-hover:scale-110 transition-transform">95%</h3>
+                            <p class="text-gray-400">Satisfaction</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black to-transparent z-10"></div>
+                    <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_xsbnsnmg.json" 
+                                 background="transparent" 
+                                 speed="1" 
+                                 class="floating" 
+                                 loop 
+                                 autoplay>
+                    </lottie-player>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Events Section -->
+    <section id="featured" class="py-20">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-6xl font-bold mb-4 gradient-text">Featured Events</h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto">Discover extraordinary events that await you. From tech talks to cultural festivals, find your next adventure here.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                {% for event in featured_events %}
+                <div class="gradient-border event-card">
+                    <div class="glass-card p-6 h-full">
+                        {% if event.poster %}
+                        <img src="{{ url_for('static', filename=event.poster) }}" 
+                             alt="{{ event.title }}" 
+                             class="w-full h-48 object-cover rounded-lg mb-6 transform transition-transform group-hover:scale-105">
+                        {% endif %}
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="px-4 py-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-sm font-medium">
+                                    {{ event.category }}
+                                </span>
+                                <span class="text-blue-400 font-bold">₹{{ event.price }}</span>
+                            </div>
+                            <h3 class="text-2xl font-bold neon-text">{{ event.title }}</h3>
+                            <p class="text-gray-400">{{ event.description[:100] }}...</p>
+                            <div class="flex items-center justify-between pt-4">
+                                <div class="text-sm text-gray-400">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    {{ event.date.strftime('%B %d, %Y') }}
+                                </div>
+                                <a href="{{ url_for('login') }}" class="btn-primary text-sm px-6 py-2 transform hover:scale-105">
+                                    Book Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 relative overflow-hidden">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-6xl font-bold mb-4 gradient-text">How It Works</h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto">Encypherist develops students' AI, ML, and coding skills through workshops, hackathons, projects, guest lectures, and a live event platform.</p>
+            </div>
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="glass-card p-8 text-center group">
+                    <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold transform group-hover:rotate-12 transition-transform">1</div>
+                    <h3 class="text-2xl font-bold mb-4 neon-text">Register</h3>
+                    <p class="text-gray-400">Join as a student or event organizer in seconds</p>
+                </div>
+                <div class="glass-card p-8 text-center group">
+                    <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold transform group-hover:rotate-12 transition-transform">2</div>
+                    <h3 class="text-2xl font-bold mb-4 neon-text">Browse Events</h3>
+                    <p class="text-gray-400">Discovev amazing events </p>
+                </div>
+                <div class="glass-card p-8 text-center group">
+                    <div class="w-20 h-20 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold transform group-hover:rotate-12 transition-transform">3</div>
+                    <h3 class="text-2xl font-bold mb-4 neon-text">Book Tickets</h3>
+                    <p class="text-gray-400">Secure your spot with instant confirmation</p>
+                </div>
+                <div class="glass-card p-8 text-center group">
+                    <div class="w-20 h-20 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold transform group-hover:rotate-12 transition-transform">4</div>
+                    <h3 class="text-2xl font-bold mb-4 neon-text">Attend Event</h3>
+                    <p class="text-gray-400">Show your digital ticket and enjoy!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-6">
+            <div class="gradient-border">
+                <div class="glass-card p-16 text-center transform hover:scale-105 transition-transform">
+                    <h2 class="text-5xl md:text-6xl font-bold mb-6 gradient-text">Ready to Get Started?</h2>
+                    <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">Join hunderds of students who are already part of the Encypherist community.</p>
+                    <div class="flex flex-wrap justify-center gap-6">
+                        <a href="{{ url_for('register') }}" class="btn-primary group">
+                            <span class="inline-block transform group-hover:scale-110 transition-transform">
+                                Create Account
+                            </span>
+                        </a>
+                        <a href="#featured" class="btn-secondary group">
+                            <span class="inline-block transform group-hover:scale-110 transition-transform">
+                                Browse Events
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4 gradient-text">Encypherist</h3>
+                    <p class="text-gray-400">Revolutionizing Tech experiences.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-xl">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#featured" class="hover:text-blue-400 transition">Events</a></li>
+                        <li><a href="#how-it-works" class="hover:text-blue-400 transition">How It Works</a></li>
+                        <li><a href="#testimonials" class="hover:text-blue-400 transition">Testimonials</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-xl">Support</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-blue-400 transition">Help Center</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-xl">Connect With Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition transform hover:scale-110">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition transform hover:scale-110">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition transform hover:scale-110">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; 2025 Encypherist. All rights reserved.</p>
+                
+                <!-- Database Clear Form -->
+                <form action="{{ url_for('clear_database') }}" method="POST" class="mt-4" onsubmit="return confirm('WARNING: This will delete ALL data from the database. Are you sure?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <!-- <button type="submit" class="text-red-400 hover:text-red-300 transition-colors text-sm">
+                        Clear Database
+                    </button> -->
+                </form>
+            </div>
+    </div>
+    </footer>
+
+    <script>
+        // Initialize VANTA.NET
+        VANTA.NET({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x3b82f6,
+            backgroundColor: 0x0a0a0a,
+            points: 10.00,
+            maxDistance: 20.00,
+            spacing: 16.00
+        });
+
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.top = Math.random() * window.innerHeight + 'px';
+            particle.style.animation = `moveParticle ${Math.random() * 3 + 2}s linear`;
+            document.body.appendChild(particle);
+            
+            particle.addEventListener('animationend', () => {
+                particle.remove();
+            });
+        }
+
+        setInterval(createParticle, 200);
+    </script>
+</body>
+</html>
