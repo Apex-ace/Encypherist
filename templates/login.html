@@ -152,9 +152,8 @@
                 <div>
                     <input type="email" id="username" name="username" required
                            class="input-field"
-                           pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
-                           placeholder="Enter your Gmail address">
-                    <div class="error-message" id="emailError">Please enter a valid Gmail address (example@gmail.com)</div>
+                           placeholder="Enter your email address">
+                    <div class="error-message" id="emailError">Please enter a valid email address</div>
                 </div>
                 
                 <div>
@@ -195,8 +194,8 @@
         const submitBtn = document.getElementById('submitBtn');
 
         function validateEmail(email) {
-            const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-            return gmailRegex.test(email);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
         }
 
         function showError(input, errorElement, message) {
@@ -215,7 +214,7 @@
 
             // Email validation
             if (!validateEmail(emailInput.value)) {
-                showError(emailInput, emailError, 'Please enter a valid Gmail address (example@gmail.com)');
+                showError(emailInput, emailError, 'Please enter a valid email address');
                 isValid = false;
             } else {
                 hideError(emailInput, emailError);
@@ -237,7 +236,7 @@
             if (validateEmail(emailInput.value)) {
                 hideError(emailInput, emailError);
             } else {
-                showError(emailInput, emailError, 'Please enter a valid Gmail address (example@gmail.com)');
+                showError(emailInput, emailError, 'Please enter a valid email address');
             }
         });
 
