@@ -332,6 +332,10 @@ def login():
                     login_user(user, remember=remember)
                     logger.info(f"Successful login for user: {username}")
                     flash('Logged in successfully!', 'success')
+                    
+                    # Redirect based on user role
+                    if user.role == 'admin':
+                        return redirect(url_for('admin_dashboard'))
                     return redirect(url_for('home'))
                 
                 logger.warning(f"Failed login attempt for username: {username}")
