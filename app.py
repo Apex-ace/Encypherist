@@ -331,7 +331,7 @@ def login():
                     login_user(user, remember=remember)
                     logger.info(f"Successful login for user: {username}")
                     flash('Logged in successfully!', 'success')
-                    return redirect(url_for('dashboard'))
+                    return redirect(url_for('home'))
                 
                 logger.warning(f"Failed login attempt for username: {username}")
                 flash('Invalid username or password', 'error')
