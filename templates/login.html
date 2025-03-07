@@ -150,10 +150,9 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 
                 <div>
-                    <input type="email" id="username" name="username" required
+                    <input type="text" id="username" name="username" required
                            class="input-field"
-                           placeholder="Enter your email address">
-                    <div class="error-message" id="emailError">Please enter a valid email address</div>
+                           placeholder="Enter your username">
                 </div>
                 
                 <div>
@@ -187,16 +186,9 @@
     </div>
 
     <script>
-        const emailInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
-        const emailError = document.getElementById('emailError');
         const passwordError = document.getElementById('passwordError');
         const submitBtn = document.getElementById('submitBtn');
-
-        function validateEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
 
         function showError(input, errorElement, message) {
             input.classList.add('error');
@@ -212,14 +204,6 @@
         function validateForm() {
             let isValid = true;
 
-            // Email validation
-            if (!validateEmail(emailInput.value)) {
-                showError(emailInput, emailError, 'Please enter a valid email address');
-                isValid = false;
-            } else {
-                hideError(emailInput, emailError);
-            }
-
             // Password validation
             if (passwordInput.value.length < 6) {
                 showError(passwordInput, passwordError, 'Password must be at least 6 characters long');
@@ -232,14 +216,6 @@
         }
 
         // Real-time validation
-        emailInput.addEventListener('input', () => {
-            if (validateEmail(emailInput.value)) {
-                hideError(emailInput, emailError);
-            } else {
-                showError(emailInput, emailError, 'Please enter a valid email address');
-            }
-        });
-
         passwordInput.addEventListener('input', () => {
             if (passwordInput.value.length >= 6) {
                 hideError(passwordInput, passwordError);
