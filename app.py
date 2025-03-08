@@ -313,41 +313,41 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     try:
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
             remember = request.form.get('remember') == 'on'
             
             logger.info(f"Login attempt for username: {username}")
-            
-            if not username or not password:
+        
+        if not username or not password:
                 logger.warning("Login attempt with missing credentials")
-                flash('Please provide both username and password', 'error')
-                return redirect(url_for('login'))
+            flash('Please provide both username and password', 'error')
+            return redirect(url_for('login'))
             
             try:
-                user = User.query.filter_by(username=username).first()
-                
-                if user and check_password_hash(user.password, password):
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
                     login_user(user, remember=remember)
                     logger.info(f"Successful login for user: {username}")
-                    flash('Logged in successfully!', 'success')
-                    
+            flash('Logged in successfully!', 'success')
+            
                     # Redirect based on user role
-                    if user.role == 'admin':
-                        return redirect(url_for('admin_dashboard'))
+            if user.role == 'admin':
+                return redirect(url_for('admin_dashboard'))
                     return redirect(url_for('home'))
-                
+            
                 logger.warning(f"Failed login attempt for username: {username}")
-                flash('Invalid username or password', 'error')
-                return redirect(url_for('login'))
+        flash('Invalid username or password', 'error')
+        return redirect(url_for('login'))
                 
             except Exception as e:
                 logger.error(f"Database error during login: {str(e)}")
                 flash('An error occurred during login. Please try again.', 'error')
                 return redirect(url_for('login'))
         
-        return render_template('login.html')
+    return render_template('login.html')
         
     except Exception as e:
         logger.error(f"Unexpected error in login route: {str(e)}")
@@ -976,8 +976,8 @@ def approve_event(event_id):
         return redirect(url_for('home'))
     
     try:
-        event = Event.query.get_or_404(event_id)
-        event.status = 'approved'
+    event = Event.query.get_or_404(event_id)
+    event.status = 'approved'
         
         # Create notification for event organizer
         notification = Notification(
@@ -990,8 +990,8 @@ def approve_event(event_id):
         )
         
         db.session.add(notification)
-        db.session.commit()
-        
+    db.session.commit()
+    
         # Log the activity
         activity = UserActivity(
             user_id=current_user.id,
@@ -1002,9 +1002,9 @@ def approve_event(event_id):
         )
         db.session.add(activity)
         db.session.commit()
-        
-        flash('Event approved successfully')
-        return redirect(url_for('admin_events'))
+    
+    flash('Event approved successfully')
+    return redirect(url_for('admin_events'))
         
     except Exception as e:
         db.session.rollback()
@@ -1020,8 +1020,8 @@ def reject_event(event_id):
         return redirect(url_for('home'))
     
     try:
-        event = Event.query.get_or_404(event_id)
-        event.status = 'rejected'
+    event = Event.query.get_or_404(event_id)
+    event.status = 'rejected'
         
         # Create notification for event organizer
         notification = Notification(
@@ -1034,8 +1034,8 @@ def reject_event(event_id):
         )
         
         db.session.add(notification)
-        db.session.commit()
-        
+    db.session.commit()
+    
         # Log the activity
         activity = UserActivity(
             user_id=current_user.id,
@@ -1046,9 +1046,9 @@ def reject_event(event_id):
         )
         db.session.add(activity)
         db.session.commit()
-        
-        flash('Event rejected successfully')
-        return redirect(url_for('admin_events'))
+    
+    flash('Event rejected successfully')
+    return redirect(url_for('admin_events'))
         
     except Exception as e:
         db.session.rollback()
@@ -1269,18 +1269,18 @@ def send_message():
     except Exception as e:
         db.session.rollback()
         flash('Error sending message. Please try again.')
-    
+
     return redirect(url_for('messages'))
 
 @app.route('/conversation/<int:user_id>')
 @login_required
 def conversation(user_id):
-    other_user = User.query.get_or_404(user_id)
-    messages = Message.query.filter(
+        other_user = User.query.get_or_404(user_id)
+        messages = Message.query.filter(
         ((Message.sender_id == current_user.id) & (Message.receiver_id == user_id)) |
         ((Message.sender_id == user_id) & (Message.receiver_id == current_user.id))
-    ).order_by(Message.timestamp.asc()).all()
-    
+        ).order_by(Message.timestamp.asc()).all()
+        
     # Mark messages as read
     for message in messages:
         if message.receiver_id == current_user.id and not message.read:
@@ -1292,45 +1292,49 @@ def conversation(user_id):
 @app.route('/profile')
 @login_required
 def profile():
-    if current_user.role == 'student':
-        return redirect(url_for('student_profile'))
-    elif current_user.role == 'organizer':
-        return redirect(url_for('organizer_profile'))
-    return redirect(url_for('home'))
+    try:
+        if current_user.role == 'student':
+            return redirect(url_for('student_profile'))
+        elif current_user.role == 'organizer':
+            return redirect(url_for('organizer_profile'))
+        elif current_user.role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Invalid user role', 'danger')
+            return redirect(url_for('home'))
+    except Exception as e:
+        app.logger.error(f"Error in profile route: {str(e)}")
+        flash('An error occurred while accessing your profile', 'danger')
+        return redirect(url_for('home'))
 
 @app.route('/student_profile')
 @login_required
 def student_profile():
-    if current_user.role != 'student':
-        flash('Unauthorized access')
-        return redirect(url_for('home'))
-    
     try:
-        # Get bookings with event information using join and eager loading
-        bookings = db.session.query(Booking, Event)\
-            .join(Event, Booking.event_id == Event.id)\
+        if current_user.role != 'student':
+            flash('Access denied. You must be a student to view this page.', 'danger')
+            return redirect(url_for('home'))
+            
+        # Get user's bookings with event details
+        bookings = db.session.query(Booking).filter_by(user_id=current_user.id)\
             .options(db.joinedload(Booking.event))\
-            .filter(Booking.user_id == current_user.id)\
-            .order_by(Booking.booking_date.desc())\
+            .order_by(Booking.created_at.desc())\
             .all()
-        
-        # Get reviews with event information using join and eager loading
-        reviews = db.session.query(Review, Event)\
-            .join(Event, Review.event_id == Event.id)\
+            
+        # Get user's reviews
+        reviews = db.session.query(Review).filter_by(user_id=current_user.id)\
             .options(db.joinedload(Review.event))\
-            .filter(Review.user_id == current_user.id)\
             .order_by(Review.created_at.desc())\
             .all()
+            
+        return render_template('student_profile.html', 
+                             user=current_user,
+                             bookings=bookings,
+                             reviews=reviews)
         
-        return render_template(
-            'student_profile.html',
-            bookings=bookings,
-            reviews=reviews,
-            user=current_user
-        )
     except Exception as e:
         app.logger.error(f"Error in student_profile: {str(e)}")
-        flash('An error occurred while loading your profile. Please try again.')
+        flash('An error occurred while loading your profile. Please try again.', 'danger')
         return redirect(url_for('home'))
 
 @app.route('/organizer_profile')
@@ -1344,7 +1348,7 @@ def organizer_profile():
         # Get events with booking information using eager loading
         events = db.session.query(Event)\
             .options(
-                db.joinedload(Event.bookings),
+                db.joinedload(Event.bookings).joinedload(Booking.user),
                 db.joinedload(Event.organizer)
             )\
             .filter(Event.organizer_id == current_user.id)\
@@ -1457,10 +1461,10 @@ def reset_password():
             flash('New passwords do not match')
             return redirect(url_for('reset_password'))
         
-        current_user.password = generate_password_hash(new_password)
-        db.session.commit()
+            current_user.password = generate_password_hash(new_password)
+            db.session.commit()
         flash('Password updated successfully!')
-        return redirect(url_for('profile'))
+            return redirect(url_for('profile'))
     
     return render_template('reset_password.html')
 
@@ -1471,12 +1475,12 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
         
         if user:
-            # Generate password reset token
+        # Generate password reset token
             token = generate_reset_token(user)
-            # Send password reset email
+        # Send password reset email
             send_reset_email(user, token)
-            flash('Password reset instructions have been sent to your email')
-            return redirect(url_for('login'))
+        flash('Password reset instructions have been sent to your email')
+        return redirect(url_for('login'))
         
         flash('Email address not found')
         return redirect(url_for('forgot_password'))
@@ -1486,12 +1490,105 @@ def forgot_password():
 @app.route('/google_login')
 def google_login():
     # Implement Google OAuth login
-    return redirect(url_for('login'))
-
+        return redirect(url_for('login'))
+    
 @app.route('/event/<int:event_id>')
 def event(event_id):
     event = Event.query.get_or_404(event_id)
     return render_template('event_details.html', event=event)
+
+@app.route('/view_ticket/<int:booking_id>')
+@login_required
+def view_ticket(booking_id):
+    try:
+        booking = Booking.query.get_or_404(booking_id)
+        if booking.user_id != current_user.id:
+            flash('Unauthorized access')
+            return redirect(url_for('home'))
+        
+        event = Event.query.get_or_404(booking.event_id)
+        return render_template('ticket.html', booking=booking, event=event)
+    except Exception as e:
+        app.logger.error(f"Error viewing ticket: {str(e)}")
+        flash('An error occurred while viewing the ticket. Please try again.')
+        return redirect(url_for('home'))
+    
+@app.route('/event_details/<int:event_id>')
+def event_details(event_id):
+    try:
+        event = Event.query.get_or_404(event_id)
+        return render_template('event_details.html', event=event)
+    except Exception as e:
+        app.logger.error(f"Error viewing event details: {str(e)}")
+        flash('An error occurred while viewing the event details. Please try again.')
+        return redirect(url_for('home'))
+
+@app.route('/download_registrations/<int:event_id>')
+@login_required
+def download_registrations(event_id):
+    try:
+        # Check if user is the organizer of this event
+        event = Event.query.get_or_404(event_id)
+        if current_user.role != 'organizer' or event.organizer_id != current_user.id:
+            flash('Unauthorized access', 'danger')
+            return redirect(url_for('home'))
+        
+        # Get all bookings for this event with user details
+        bookings = Booking.query.filter_by(event_id=event_id).all()
+        
+        # Create PDF
+        output = BytesIO()
+        c = canvas.Canvas(output, pagesize=letter)
+        
+        # Title
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(50, 750, f"Registered Students - {event.title}")
+        c.setFont("Helvetica", 12)
+        c.drawString(50, 730, f"Date: {event.date.strftime('%B %d, %Y')}")
+        c.drawString(50, 710, f"Total Registrations: {len(bookings)}")
+        
+        # Headers
+        y = 670
+        headers = ['Name', 'Email', 'Mobile', 'Branch', 'Year', 'Booking Date']
+        x_positions = [50, 150, 300, 400, 480, 530]
+        
+        for i, header in enumerate(headers):
+            c.drawString(x_positions[i], y, header)
+        
+        # Draw a line under headers
+        y -= 15
+        c.line(50, y, 550, y)
+        y -= 20
+        
+        # Add registrations
+        for booking in bookings:
+            # Check if we need a new page
+            if y < 50:
+                c.showPage()
+                y = 750
+                
+            c.drawString(x_positions[0], y, booking.name)
+            c.drawString(x_positions[1], y, booking.email)
+            c.drawString(x_positions[2], y, booking.mobile)
+            c.drawString(x_positions[3], y, booking.branch)
+            c.drawString(x_positions[4], y, booking.year)
+            c.drawString(x_positions[5], y, booking.booking_date.strftime('%Y-%m-%d'))
+            y -= 20
+        
+        c.save()
+        output.seek(0)
+        
+        return send_file(
+            output,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'registrations_{event.title}_{datetime.now().strftime("%Y%m%d")}.pdf'
+        )
+        
+    except Exception as e:
+        app.logger.error(f"Error downloading registrations: {str(e)}")
+        flash('An error occurred while downloading registrations', 'danger')
+        return redirect(url_for('organizer_profile'))
 
 # Initialize the application
 init_app()
