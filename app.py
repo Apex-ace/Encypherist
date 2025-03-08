@@ -1306,19 +1306,21 @@ def student_profile():
         return redirect(url_for('home'))
     
     try:
-        # Get bookings with event information using join
-        bookings = db.session.query(Booking, Event).join(
-            Event, Booking.event_id == Event.id
-        ).filter(
-            Booking.user_id == current_user.id
-        ).order_by(Booking.booking_date.desc()).all()
+        # Get bookings with event information using join and eager loading
+        bookings = db.session.query(Booking, Event)\
+            .join(Event, Booking.event_id == Event.id)\
+            .options(db.joinedload(Booking.event))\
+            .filter(Booking.user_id == current_user.id)\
+            .order_by(Booking.booking_date.desc())\
+            .all()
         
-        # Get reviews with event information
-        reviews = db.session.query(Review, Event).join(
-            Event, Review.event_id == Event.id
-        ).filter(
-            Review.user_id == current_user.id
-        ).order_by(Review.created_at.desc()).all()
+        # Get reviews with event information using join and eager loading
+        reviews = db.session.query(Review, Event)\
+            .join(Event, Review.event_id == Event.id)\
+            .options(db.joinedload(Review.event))\
+            .filter(Review.user_id == current_user.id)\
+            .order_by(Review.created_at.desc())\
+            .all()
         
         return render_template(
             'student_profile.html',
@@ -1339,29 +1341,39 @@ def organizer_profile():
         return redirect(url_for('home'))
     
     try:
-        # Get events with booking information
+        # Get events with booking information using eager loading
         events = db.session.query(Event)\
-            .filter_by(organizer_id=current_user.id)\
+            .options(
+                db.joinedload(Event.bookings),
+                db.joinedload(Event.organizer)
+            )\
+            .filter(Event.organizer_id == current_user.id)\
             .order_by(Event.date.desc())\
             .all()
         
-        # Calculate statistics
-        total_events = len(events)
-        total_bookings = sum(len(event.bookings) for event in events)
-        total_revenue = sum(event.price * (event.total_tickets - event.remaining_tickets) for event in events)
+        # Calculate statistics safely
+        total_events = len(events) if events else 0
+        total_bookings = sum(len(event.bookings) if event.bookings else 0 for event in events)
+        total_revenue = sum(
+            event.price * (event.total_tickets - (event.remaining_tickets or 0))
+            for event in events
+            if event.price is not None and event.total_tickets is not None
+        )
         
         # Get upcoming and past events
         now = datetime.utcnow()
-        upcoming_events = [event for event in events if event.date > now]
-        past_events = [event for event in events if event.date <= now]
+        upcoming_events = [event for event in events if event.date and event.date > now]
+        past_events = [event for event in events if event.date and event.date <= now]
         
-        return render_template('organizer_profile.html',
-                             user=current_user,
-                             upcoming_events=upcoming_events,
-                             past_events=past_events,
-                             total_events=total_events,
-                             total_bookings=total_bookings,
-                             total_revenue=total_revenue)
+        return render_template(
+            'organizer_profile.html',
+            user=current_user,
+            upcoming_events=upcoming_events,
+            past_events=past_events,
+            total_events=total_events,
+            total_bookings=total_bookings,
+            total_revenue=total_revenue
+        )
                              
     except Exception as e:
         app.logger.error(f"Error in organizer_profile: {str(e)}")
