@@ -1,37 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
+<div class="container mt-5">
+    <div class="row g-4">
         <!-- User Profile Section -->
         <div class="col-md-4">
-            <div class="card mb-4">
+            <div class="card mb-4 profile-card">
                 <div class="card-body">
                     <h5 class="card-title">Profile Information</h5>
                     <p class="card-text">
                         <strong>Username:</strong> {{ user.username }}<br>
                         <strong>Role:</strong> {{ user.role|title }}
                     </p>
-                    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary w-100">Edit Profile</a>
                 </div>
             </div>
 
             <!-- Statistics Card -->
-            <div class="card">
+            <div class="card stats-card">
                 <div class="card-body">
                     <h5 class="card-title">Statistics</h5>
                     <div class="list-group list-group-flush">
                         <div class="list-group-item d-flex justify-content-between align-items-center">
-                            Total Events
-                            <span class="badge bg-primary rounded-pill">{{ total_events }}</span>
+                            <span>Total Events</span>
+                            <span class="badge bg-primary">{{ total_events }}</span>
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center">
-                            Total Bookings
-                            <span class="badge bg-success rounded-pill">{{ total_bookings }}</span>
+                            <span>Total Bookings</span>
+                            <span class="badge bg-success">{{ total_bookings }}</span>
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center">
-                            Total Revenue
-                            <span class="badge bg-info rounded-pill">₹{{ "%.2f"|format(total_revenue) }}</span>
+                            <span>Total Revenue</span>
+                            <span class="badge bg-info">₹{{ "%.2f"|format(total_revenue) }}</span>
                         </div>
                     </div>
                 </div>
@@ -41,9 +41,12 @@
         <!-- Events Section -->
         <div class="col-md-8">
             <!-- Upcoming Events -->
-            <div class="card mb-4">
+            <div class="card events-card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Upcoming Events</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">Upcoming Events</h5>
+                        <a href="{{ url_for('create_event') }}" class="btn btn-primary">Create New Event</a>
+                    </div>
                     {% if upcoming_events %}
                         <div class="table-responsive">
                             <table class="table">
@@ -88,19 +91,15 @@
                             </table>
                         </div>
                     {% else %}
-                        <p class="text-muted">No upcoming events.</p>
+                        <p class="text-muted text-center py-4">No upcoming events. Create your first event!</p>
                     {% endif %}
-                    
-                    <div class="mt-3">
-                        <a href="{{ url_for('create_event') }}" class="btn btn-primary">Create New Event</a>
-                    </div>
                 </div>
             </div>
 
             <!-- Past Events -->
-            <div class="card">
+            <div class="card events-card">
                 <div class="card-body">
-                    <h5 class="card-title">Past Events</h5>
+                    <h5 class="card-title mb-4">Past Events</h5>
                     {% if past_events %}
                         <div class="table-responsive">
                             <table class="table">
@@ -133,11 +132,54 @@
                             </table>
                         </div>
                     {% else %}
-                        <p class="text-muted">No past events.</p>
+                        <p class="text-muted text-center py-4">No past events found.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .profile-card, .stats-card, .events-card {
+        backdrop-filter: blur(20px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-card:hover, .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 32px rgba(96, 165, 250, 0.2);
+    }
+
+    .events-card {
+        overflow: hidden;
+    }
+
+    .list-group-item {
+        margin: 0.5rem 0;
+        border-radius: 8px;
+    }
+
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .btn-group .btn {
+        margin: 0 0.25rem;
+    }
+
+    .table th {
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+</style>
 {% endblock %} 
