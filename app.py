@@ -975,18 +975,42 @@ def approve_event(event_id):
         flash('Unauthorized access')
         return redirect(url_for('home'))
     
-    event = Event.query.get_or_404(event_id)
-    event.status = 'approved'
-    db.session.commit()
-    
-    log_user_activity(
-        current_user.id,
-        'approve_event',
-        f'Approved event: {event.title}'
-    )
-    
-    flash('Event approved successfully')
-    return redirect(url_for('admin_events'))
+    try:
+        event = Event.query.get_or_404(event_id)
+        event.status = 'approved'
+        
+        # Create notification for event organizer
+        notification = Notification(
+            user_id=event.organizer_id,
+            event_id=event.id,
+            type='event_approval',
+            title='Event Approved',
+            content=f'Your event "{event.title}" has been approved by admin.',
+            timestamp=datetime.utcnow()
+        )
+        
+        db.session.add(notification)
+        db.session.commit()
+        
+        # Log the activity
+        activity = UserActivity(
+            user_id=current_user.id,
+            activity_type='approve_event',
+            description=f'Approved event: {event.title}',
+            timestamp=datetime.utcnow(),
+            ip_address=request.remote_addr
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        flash('Event approved successfully')
+        return redirect(url_for('admin_events'))
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error approving event {event_id}: {str(e)}")
+        flash('An error occurred while approving the event. Please try again.')
+        return redirect(url_for('admin_events'))
 
 @app.route('/admin/reject_event/<int:event_id>', methods=['POST'])
 @login_required
@@ -995,18 +1019,42 @@ def reject_event(event_id):
         flash('Unauthorized access')
         return redirect(url_for('home'))
     
-    event = Event.query.get_or_404(event_id)
-    event.status = 'rejected'
-    db.session.commit()
-    
-    log_user_activity(
-        current_user.id,
-        'reject_event',
-        f'Rejected event: {event.title}'
-    )
-    
-    flash('Event rejected successfully')
-    return redirect(url_for('admin_events'))
+    try:
+        event = Event.query.get_or_404(event_id)
+        event.status = 'rejected'
+        
+        # Create notification for event organizer
+        notification = Notification(
+            user_id=event.organizer_id,
+            event_id=event.id,
+            type='event_rejection',
+            title='Event Rejected',
+            content=f'Your event "{event.title}" has been rejected by admin.',
+            timestamp=datetime.utcnow()
+        )
+        
+        db.session.add(notification)
+        db.session.commit()
+        
+        # Log the activity
+        activity = UserActivity(
+            user_id=current_user.id,
+            activity_type='reject_event',
+            description=f'Rejected event: {event.title}',
+            timestamp=datetime.utcnow(),
+            ip_address=request.remote_addr
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        flash('Event rejected successfully')
+        return redirect(url_for('admin_events'))
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error rejecting event {event_id}: {str(e)}")
+        flash('An error occurred while rejecting the event. Please try again.')
+        return redirect(url_for('admin_events'))
 
 @app.route('/admin/activity_log')
 @login_required
