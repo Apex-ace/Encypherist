@@ -1257,10 +1257,31 @@ def student_profile():
         flash('Unauthorized access')
         return redirect(url_for('home'))
     
-    bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.booking_date.desc()).all()
-    reviews = Review.query.filter_by(user_id=current_user.id).order_by(Review.created_at.desc()).all()
-    
-    return render_template('student_profile.html', bookings=bookings, reviews=reviews)
+    try:
+        # Get bookings with event information using join
+        bookings = db.session.query(Booking, Event).join(
+            Event, Booking.event_id == Event.id
+        ).filter(
+            Booking.user_id == current_user.id
+        ).order_by(Booking.booking_date.desc()).all()
+        
+        # Get reviews with event information
+        reviews = db.session.query(Review, Event).join(
+            Event, Review.event_id == Event.id
+        ).filter(
+            Review.user_id == current_user.id
+        ).order_by(Review.created_at.desc()).all()
+        
+        return render_template(
+            'student_profile.html',
+            bookings=bookings,
+            reviews=reviews,
+            user=current_user
+        )
+    except Exception as e:
+        app.logger.error(f"Error in student_profile: {str(e)}")
+        flash('An error occurred while loading your profile. Please try again.')
+        return redirect(url_for('home'))
 
 @app.route('/organizer_profile')
 @login_required
