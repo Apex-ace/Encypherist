@@ -312,47 +312,41 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    try:
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-            remember = request.form.get('remember') == 'on'
-            
-            logger.info(f"Login attempt for username: {username}")
+        remember = request.form.get('remember') == 'on'
+        
+        logger.info(f"Login attempt for username: {username}")
         
         if not username or not password:
-                logger.warning("Login attempt with missing credentials")
+            logger.warning("Login attempt with missing credentials")
             flash('Please provide both username and password', 'error')
             return redirect(url_for('login'))
+        
+        try:
+            user = User.query.filter_by(username=username).first()
             
-            try:
-        user = User.query.filter_by(username=username).first()
-
-        if user and check_password_hash(user.password, password):
-                    login_user(user, remember=remember)
-                    logger.info(f"Successful login for user: {username}")
-            flash('Logged in successfully!', 'success')
-            
-                    # Redirect based on user role
-            if user.role == 'admin':
-                return redirect(url_for('admin_dashboard'))
-                    return redirect(url_for('home'))
-            
-                logger.warning(f"Failed login attempt for username: {username}")
-        flash('Invalid username or password', 'error')
-        return redirect(url_for('login'))
+            if user and check_password_hash(user.password, password):
+                login_user(user, remember=remember)
+                logger.info(f"Successful login for user: {username}")
+                flash('Logged in successfully!', 'success')
                 
-            except Exception as e:
-                logger.error(f"Database error during login: {str(e)}")
-                flash('An error occurred during login. Please try again.', 'error')
-                return redirect(url_for('login'))
-        
+                # Redirect based on user role
+                if user.role == 'admin':
+                    return redirect(url_for('admin_dashboard'))
+                return redirect(url_for('home'))
+            
+            logger.warning(f"Failed login attempt for username: {username}")
+            flash('Invalid username or password', 'error')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            logger.error(f"Database error during login: {str(e)}")
+            flash('An error occurred during login. Please try again.', 'error')
+            return redirect(url_for('login'))
+    
     return render_template('login.html')
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in login route: {str(e)}")
-        flash('An unexpected error occurred. Please try again.', 'error')
-        return redirect(url_for('login'))
 
 @app.route('/logout', methods=['POST'])
 @login_required
@@ -976,8 +970,8 @@ def approve_event(event_id):
         return redirect(url_for('home'))
     
     try:
-    event = Event.query.get_or_404(event_id)
-    event.status = 'approved'
+        event = Event.query.get_or_404(event_id)
+        event.status = 'approved'
         
         # Create notification for event organizer
         notification = Notification(
@@ -990,8 +984,8 @@ def approve_event(event_id):
         )
         
         db.session.add(notification)
-    db.session.commit()
-    
+        db.session.commit()
+        
         # Log the activity
         activity = UserActivity(
             user_id=current_user.id,
@@ -1002,9 +996,9 @@ def approve_event(event_id):
         )
         db.session.add(activity)
         db.session.commit()
-    
-    flash('Event approved successfully')
-    return redirect(url_for('admin_events'))
+        
+        flash('Event approved successfully')
+        return redirect(url_for('admin_events'))
         
     except Exception as e:
         db.session.rollback()
@@ -1020,8 +1014,8 @@ def reject_event(event_id):
         return redirect(url_for('home'))
     
     try:
-    event = Event.query.get_or_404(event_id)
-    event.status = 'rejected'
+        event = Event.query.get_or_404(event_id)
+        event.status = 'rejected'
         
         # Create notification for event organizer
         notification = Notification(
@@ -1034,8 +1028,8 @@ def reject_event(event_id):
         )
         
         db.session.add(notification)
-    db.session.commit()
-    
+        db.session.commit()
+        
         # Log the activity
         activity = UserActivity(
             user_id=current_user.id,
@@ -1046,9 +1040,9 @@ def reject_event(event_id):
         )
         db.session.add(activity)
         db.session.commit()
-    
-    flash('Event rejected successfully')
-    return redirect(url_for('admin_events'))
+        
+        flash('Event rejected successfully')
+        return redirect(url_for('admin_events'))
         
     except Exception as e:
         db.session.rollback()
@@ -1275,12 +1269,12 @@ def send_message():
 @app.route('/conversation/<int:user_id>')
 @login_required
 def conversation(user_id):
-        other_user = User.query.get_or_404(user_id)
-        messages = Message.query.filter(
+    other_user = User.query.get_or_404(user_id)
+    messages = Message.query.filter(
         ((Message.sender_id == current_user.id) & (Message.receiver_id == user_id)) |
         ((Message.sender_id == user_id) & (Message.receiver_id == current_user.id))
-        ).order_by(Message.timestamp.asc()).all()
-        
+    ).order_by(Message.timestamp.asc()).all()
+    
     # Mark messages as read
     for message in messages:
         if message.receiver_id == current_user.id and not message.read:
@@ -1461,10 +1455,10 @@ def reset_password():
             flash('New passwords do not match')
             return redirect(url_for('reset_password'))
         
-            current_user.password = generate_password_hash(new_password)
-            db.session.commit()
+        current_user.password = generate_password_hash(new_password)
+        db.session.commit()
         flash('Password updated successfully!')
-            return redirect(url_for('profile'))
+        return redirect(url_for('profile'))
     
     return render_template('reset_password.html')
 
@@ -1475,12 +1469,12 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
         
         if user:
-        # Generate password reset token
+            # Generate password reset token
             token = generate_reset_token(user)
-        # Send password reset email
+            # Send password reset email
             send_reset_email(user, token)
-        flash('Password reset instructions have been sent to your email')
-        return redirect(url_for('login'))
+            flash('Password reset instructions have been sent to your email')
+            return redirect(url_for('login'))
         
         flash('Email address not found')
         return redirect(url_for('forgot_password'))
@@ -1490,7 +1484,7 @@ def forgot_password():
 @app.route('/google_login')
 def google_login():
     # Implement Google OAuth login
-        return redirect(url_for('login'))
+    return redirect(url_for('login'))
     
 @app.route('/event/<int:event_id>')
 def event(event_id):
