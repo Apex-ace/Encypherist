@@ -1,46 +1,57 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="animated-bg"></div>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Login</h4>
-                </div>
-                <div class="card-body">
+            <div class="card glass">
+                <div class="card-body p-4">
+                    <h2 class="gradient-text text-center mb-4">Welcome Back!</h2>
+                    
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             {% for category, message in messages %}
-                                <div class="alert alert-{{ category if category != 'message' else 'info' }}">
+                                <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show">
                                     {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
                     
-                    <form method="POST" action="{{ url_for('login') }}">
+                    <form method="POST" action="{{ url_for('login') }}" id="loginForm" onsubmit="return validateForm()">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="username" name="username" required>
+                        <div class="mb-4">
+                            <input type="email" 
+                                   class="form-control input-field" 
+                                   id="username" 
+                                   name="username" 
+                                   placeholder="Email address"
+                                   required>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="mb-4">
+                            <input type="password" 
+                                   class="form-control input-field" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Password"
+                                   required>
+                            <div class="error-message" id="passwordError"></div>
                         </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                            <label class="form-check-label" for="remember">Remember me</label>
+                        <div class="mb-4 d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                <label class="form-check-label" for="remember">Remember me</label>
+                            </div>
+                            <a href="{{ url_for('forgot_password') }}" class="text-accent">Forgot password?</a>
                         </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </div>
+                        <button type="submit" class="btn btn-glow w-100 mb-4">Sign In</button>
                     </form>
                     
-                    <div class="mt-3 text-center">
-                        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
-                        <p><a href="{{ url_for('forgot_password') }}">Forgot your password?</a></p>
+                    <div class="text-center">
+                        <p class="mb-0">Don't have an account? <a href="{{ url_for('register') }}" class="text-accent">Register here</a></p>
                     </div>
                 </div>
             </div>
@@ -49,44 +60,123 @@
 </div>
 
 <style>
-.card {
-    border: none;
-    border-radius: 15px;
-    background: rgba(255, 255, 255, 0.9);
+.animated-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: 
+        radial-gradient(circle at 15% 50%, rgba(100, 255, 218, 0.08) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(100, 255, 218, 0.08) 0%, transparent 25%);
+    animation: bgAnimation 15s ease infinite alternate;
+}
+
+@keyframes bgAnimation {
+    0% { transform: scale(1) rotate(0deg); }
+    100% { transform: scale(1.2) rotate(5deg); }
+}
+
+.glass {
+    background: rgba(17, 34, 64, 0.8);
     backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 255, 218, 0.1);
+    border-radius: 16px;
 }
 
-.card-header {
-    border-radius: 15px 15px 0 0 !important;
-    background: linear-gradient(45deg, #1a237e, #0d47a1) !important;
+.gradient-text {
+    background: linear-gradient(45deg, #64ffda, #4cd8b9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
 }
 
-.form-control {
-    border-radius: 10px;
-    padding: 10px 15px;
-}
-
-.btn-primary {
-    background: linear-gradient(45deg, #1a237e, #0d47a1);
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
+.input-field {
+    background: rgba(10, 25, 47, 0.7);
+    border: 1px solid rgba(100, 255, 218, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #e6f1ff;
     transition: all 0.3s ease;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+.input-field:focus {
+    border-color: #64ffda;
+    box-shadow: 0 0 0 2px rgba(100, 255, 218, 0.1);
+    background: rgba(10, 25, 47, 0.9);
 }
 
-a {
-    color: #1a237e;
+.input-field::placeholder {
+    color: rgba(230, 241, 255, 0.5);
+}
+
+.error-message {
+    color: #ff6b6b;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.btn-glow {
+    background: linear-gradient(45deg, #64ffda, #4cd8b9);
+    border: none;
+    color: #0a192f;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(100, 255, 218, 0.4);
+    background: linear-gradient(45deg, #4cd8b9, #64ffda);
+}
+
+.text-accent {
+    color: #64ffda;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-a:hover {
-    color: #0d47a1;
+.text-accent:hover {
+    color: #4cd8b9;
+}
+
+.form-check-input:checked {
+    background-color: #64ffda;
+    border-color: #64ffda;
+}
+
+.form-check-input:focus {
+    border-color: #64ffda;
+    box-shadow: 0 0 0 0.25rem rgba(100, 255, 218, 0.25);
 }
 </style>
+
+<script>
+function validateForm() {
+    const password = document.getElementById('password');
+    const passwordError = document.getElementById('passwordError');
+    
+    if (password.value.length < 6) {
+        passwordError.textContent = 'Password must be at least 6 characters long';
+        passwordError.style.display = 'block';
+        password.classList.add('error');
+        return false;
+    }
+    
+    passwordError.style.display = 'none';
+    password.classList.remove('error');
+    return true;
+}
+
+document.getElementById('password').addEventListener('input', function() {
+    if (this.value.length >= 6) {
+        this.classList.remove('error');
+        document.getElementById('passwordError').style.display = 'none';
+    }
+});
+</script>
 {% endblock %}
