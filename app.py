@@ -1290,16 +1290,35 @@ def organizer_profile():
         flash('Unauthorized access')
         return redirect(url_for('home'))
     
-    events = Event.query.filter_by(organizer_id=current_user.id).order_by(Event.date.desc()).all()
-    total_events = len(events)
-    total_bookings = sum(event.bookings.count() for event in events)
-    total_revenue = sum(event.price * (event.total_tickets - event.remaining_tickets) for event in events)
-    
-    return render_template('organizer_profile.html',
-                         events=events,
-                         total_events=total_events,
-                         total_bookings=total_bookings,
-                         total_revenue=total_revenue)
+    try:
+        # Get events with booking information
+        events = db.session.query(Event)\
+            .filter_by(organizer_id=current_user.id)\
+            .order_by(Event.date.desc())\
+            .all()
+        
+        # Calculate statistics
+        total_events = len(events)
+        total_bookings = sum(len(event.bookings) for event in events)
+        total_revenue = sum(event.price * (event.total_tickets - event.remaining_tickets) for event in events)
+        
+        # Get upcoming and past events
+        now = datetime.utcnow()
+        upcoming_events = [event for event in events if event.date > now]
+        past_events = [event for event in events if event.date <= now]
+        
+        return render_template('organizer_profile.html',
+                             user=current_user,
+                             upcoming_events=upcoming_events,
+                             past_events=past_events,
+                             total_events=total_events,
+                             total_bookings=total_bookings,
+                             total_revenue=total_revenue)
+                             
+    except Exception as e:
+        app.logger.error(f"Error in organizer_profile: {str(e)}")
+        flash('An error occurred while loading your profile. Please try again.')
+        return redirect(url_for('home'))
 
 @app.route('/notifications')
 @login_required
