@@ -117,7 +117,7 @@ class Event(db.Model):
     max_group_size = db.Column(db.Integer, default=1)
     
     # Relationships
-    organizer = db.relationship('User', backref='events')
+    organizer = db.relationship('User', foreign_keys=[organizer_id])
     bookings = db.relationship('Booking', backref='event', lazy=True)
     notifications = db.relationship('Notification', backref='event', lazy='dynamic')
     messages = db.relationship('Message', backref='event', lazy='dynamic')
