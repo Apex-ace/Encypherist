@@ -1,6 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
+from flask import (
+    Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
+)
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_login import (
+    LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+)
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf.csrf import CSRFProtect
@@ -18,6 +22,7 @@ import logging
 import time
 import sys
 from itsdangerous import URLSafeTimedSerializer
+from werkzeug.urls import url_parse
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -32,70 +37,91 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///eve
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', 'static/uploads')
 app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
-app.config['ALLOWED_EXTENSIONS'] = os.environ.get('ALLOWED_EXTENSIONS', 'png,jpg,jpeg,gif,pdf').split(',')
-app.config['SESSION_COOKIE_SECURE'] = os.environ.get('SESSION_COOKIE_SECURE', 'true').lower() == 'true'
-app.config['REMEMBER_COOKIE_SECURE'] = os.environ.get('REMEMBER_COOKIE_SECURE', 'true').lower() == 'true'
-app.config['SESSION_COOKIE_HTTPONLY'] = os.environ.get('SESSION_COOKIE_HTTPONLY', 'true').lower() == 'true'
-app.config['REMEMBER_COOKIE_HTTPONLY'] = os.environ.get('REMEMBER_COOKIE_HTTPONLY', 'true').lower() == 'true'
+app.config['ALLOWED_EXTENSIONS'] = os.environ.get(
+    'ALLOWED_EXTENSIONS', 'png,jpg,jpeg,gif,pdf'
+).split(',')
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get(
+    'SESSION_COOKIE_SECURE', 'true'
+).lower() == 'true'
+app.config['REMEMBER_COOKIE_SECURE'] = os.environ.get(
+    'REMEMBER_COOKIE_SECURE', 'true'
+).lower() == 'true'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = int(os.environ.get('PERMANENT_SESSION_LIFETIME', 1800))
 
-# Initialize CSRF protection
-csrf = CSRFProtect(app)
-
+# Initialize extensions
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+csrf = CSRFProtect(app)
 
 # Database Models
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.Text, unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     role = db.Column(db.String(20), nullable=False)
-    profile_picture = db.Column(db.String(200))  # Store profile picture filename
+    profile_picture = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Relationships
+    activities = db.relationship('UserActivity', backref='user', lazy=True)
+    notifications = db.relationship('Notification', backref='user', lazy=True)
+    preferences = db.relationship(
+        'NotificationPreference',
+        backref='user',
+        lazy=True,
+        uselist=False
+    )
     messages_sent = db.relationship('Message', foreign_keys='Message.sender_id', backref='sender', lazy='dynamic')
     messages_received = db.relationship('Message', foreign_keys='Message.receiver_id', backref='receiver', lazy='dynamic')
-    notifications = db.relationship('Notification', backref='user', lazy='dynamic')
-    notification_preferences = db.relationship('NotificationPreference', backref='user', uselist=False)
     bookings = db.relationship('Booking', backref='user_profile', lazy='dynamic')
     events = db.relationship('Event', foreign_keys='Event.organizer_id', backref='organizer', lazy='dynamic')
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    location = db.Column(db.String(200), nullable=False)
-    price = db.Column(db.Float, nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
     date = db.Column(db.DateTime, nullable=False)
+    location = db.Column(db.String(200))
+    price = db.Column(db.Float, nullable=False)
+    total_tickets = db.Column(db.Integer, nullable=False)
+    remaining_tickets = db.Column(db.Integer, nullable=False)
     organizer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    payment_qr = db.Column(db.String(500))  # Store payment QR code
-    total_tickets = db.Column(db.Integer, nullable=False, default=0)
-    remaining_tickets = db.Column(db.Integer, nullable=False, default=0)
-    is_group_event = db.Column(db.Boolean, default=False)  # Whether event accepts group registrations
-    min_group_size = db.Column(db.Integer, default=1)  # Minimum participants per group
-    max_group_size = db.Column(db.Integer, default=1)  # Maximum participants per group
-    category = db.Column(db.String(50), nullable=True)  # Add category field
-    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    category = db.Column(db.String(50))
+    status = db.Column(db.String(20), default='pending')  # pending, approved, cancelled
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_group_event = db.Column(db.Boolean, default=False)
+    min_group_size = db.Column(db.Integer, default=1)
+    max_group_size = db.Column(db.Integer, default=1)
+    
+    # Relationships
+    organizer = db.relationship('User', backref='events')
+    bookings = db.relationship('Booking', backref='event', lazy=True)
     notifications = db.relationship('Notification', backref='event', lazy='dynamic')
     messages = db.relationship('Message', backref='event', lazy='dynamic')
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
-    booking_date = db.Column(db.DateTime, default=datetime.utcnow)  # Keep this for compatibility
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Add this for new code
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    booking_date = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(20), default='pending')  # pending, confirmed, cancelled
-    quantity = db.Column(db.Integer, default=1)
-    total_price = db.Column(db.Float, nullable=False)
-    name = db.Column(db.String(100), nullable=True)
-    email = db.Column(db.String(100), nullable=True)
-    mobile = db.Column(db.String(20), nullable=True)
-    branch = db.Column(db.String(50), nullable=True)
-    year = db.Column(db.String(10), nullable=True)
+    payment_status = db.Column(db.String(20), default='pending')  # pending, succeeded, failed
+    total_price = db.Column(db.Float)
+    qr_code = db.Column(db.String(200))  # Path to QR code image
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(120))
+    mobile = db.Column(db.String(20))
+    branch = db.Column(db.String(50))
+    year = db.Column(db.String(10))
     
-    event = db.relationship('Event', backref=db.backref('bookings', lazy=True))
+    # Relationships
+    user_profile = db.relationship('User', backref='bookings')
 
 class UserActivity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -113,6 +139,9 @@ class SystemBackup(db.Model):
     size = db.Column(db.Integer)  # Size in bytes
     status = db.Column(db.String(20), default='completed')  # started, completed, failed
 
+    # Relationships
+    user = db.relationship('User', backref=db.backref('backups', lazy=True))
+
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -121,6 +150,19 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     read = db.Column(db.Boolean, default=False)
+
+    # Relationships
+    sender = db.relationship(
+        'User',
+        foreign_keys=[sender_id],
+        backref=db.backref('messages_sent', lazy='dynamic')
+    )
+    receiver = db.relationship(
+        'User',
+        foreign_keys=[receiver_id],
+        backref=db.backref('messages_received', lazy='dynamic')
+    )
+    event = db.relationship('Event', backref=db.backref('messages', lazy='dynamic'))
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -133,6 +175,10 @@ class Notification(db.Model):
     sent = db.Column(db.Boolean, default=False)
     error = db.Column(db.Text, nullable=True)
 
+    # Relationships
+    user = db.relationship('User', backref=db.backref('notifications', lazy='dynamic'))
+    event = db.relationship('Event', backref=db.backref('notifications', lazy='dynamic'))
+
 class NotificationPreference(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -144,6 +190,9 @@ class NotificationPreference(db.Model):
     email = db.Column(db.String(120), nullable=True)
     phone = db.Column(db.String(20), nullable=True)
 
+    # Relationships
+    user = db.relationship('User', backref=db.backref('notification_preferences', uselist=False))
+
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -151,20 +200,22 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
     review_text = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Add relationships to User and Event models
-    user = db.relationship('User', backref='reviews')
-    event = db.relationship('Event', backref='reviews')
+
+    # Relationships
+    user = db.relationship('User', backref=db.backref('reviews', lazy=True))
+    event = db.relationship('Event', backref=db.backref('reviews', lazy=True))
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def load_user(id):
+    return User.query.get(int(id))
 
 def wait_for_db(max_retries=5, delay=2):
     """Wait for database to be ready"""
     for attempt in range(max_retries):
         try:
-            logger.info(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})...")
+            logger.info(
+                f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})..."
+            )
             with app.app_context():
                 db.engine.connect()
             logger.info("Database connection successful!")
@@ -330,43 +381,6 @@ def register():
             return redirect(url_for('register'))
 
     return render_template('register.html')
-
-.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        remember = bool(request.form.get('remember'))
-        
-        app.logger.info(f"Login attempt for username: {username}")
-        
-        user = User.query.filter_by(email=username).first()
-        
-        if user and check_password_hash(user.password, password):
-            login_user(user, remember=remember)
-            app.logger.info(f"Successful login for user: {username}")
-            
-            # Log the login activity safely
-            if not log_user_activity(
-                user.id,
-                'login',
-                f'User logged in from {request.remote_addr}',
-                request.remote_addr
-            ):
-                app.logger.warning(f"Failed to log login activity for user {username}")
-            
-            next_page = request.args.get('next')
-            if not next_page or url_parse(next_page).netloc != '':
-                next_page = url_for('home')
-            return redirect(next_page)
-        
-        flash('Invalid username or password', 'error')
-        return redirect(url_for('login'))
-    
-    return render_template('login.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -855,17 +869,21 @@ def edit_profile():
             )
             db.session.add(activity)
             db.session.commit()
-            
+
             flash('Profile updated successfully!', 'success')
-            return redirect(url_for('organizer_profile' if current_user.role == 'organizer' else 'student_profile'))
+            return redirect(url_for(
+                'organizer_profile' if current_user.role == 'organizer' else 'student_profile'
+            ))
 
         return render_template('edit_profile.html', user=current_user)
-        
+
     except Exception as e:
         logger.error(f"Error in edit_profile: {str(e)}")
         db.session.rollback()
         flash('An error occurred while updating your profile', 'error')
-        return redirect(url_for('organizer_profile' if current_user.role == 'organizer' else 'student_profile'))
+        return redirect(url_for(
+            'organizer_profile' if current_user.role == 'organizer' else 'student_profile'
+        ))
 
 @app.route('/organizer_profile')
 @login_required
@@ -917,15 +935,20 @@ def organizer_profile():
 @login_required
 def messages():
     # Get all messages for the current user
-    received_messages = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.timestamp.desc()).all()
-    sent_messages = Message.query.filter_by(sender_id=current_user.id).order_by(Message.timestamp.desc()).all()
+    received_messages = Message.query.filter_by(
+        receiver_id=current_user.id
+    ).order_by(Message.timestamp.desc()).all()
     
+    sent_messages = Message.query.filter_by(
+        sender_id=current_user.id
+    ).order_by(Message.timestamp.desc()).all()
+
     # Mark unread messages as read
     for message in received_messages:
         if not message.read:
             message.read = True
     db.session.commit()
-    
+
     return render_template(
         'messages.html',
         received_messages=received_messages,
@@ -996,23 +1019,22 @@ def reset_password(token):
 @login_required
 def user_notifications():
     """Handle user notifications"""
-    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    notifications = Notification.query.filter_by(
+        user_id=current_user.id
+    ).order_by(Notification.timestamp.desc()).all()
     return render_template('notifications.html', notifications=notifications)
 
-def log_user_activity(user_id, activity_type, description, ip_address):
-    """Log user activity with validation"""
+def log_user_activity(user_id, activity_type, description, ip_address=None):
     try:
-        # First check if user exists
         user = User.query.get(user_id)
         if not user:
-            app.logger.error(f"Attempted to log activity for non-existent user ID: {user_id}")
+            app.logger.error(f"Failed to log activity: User {user_id} not found")
             return False
-            
+        
         activity = UserActivity(
             user_id=user_id,
             activity_type=activity_type,
             description=description,
-            timestamp=datetime.utcnow(),
             ip_address=ip_address
         )
         db.session.add(activity)
