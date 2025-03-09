@@ -69,18 +69,35 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True)
     
     # Relationships
-    activities = db.relationship('UserActivity', backref='user', lazy=True)
-    notifications = db.relationship('Notification', backref='user', lazy=True)
+    activities = db.relationship('UserActivity', backref='activity_user', lazy=True)
+    notifications = db.relationship('Notification', backref='notification_user', lazy='dynamic')
     preferences = db.relationship(
         'NotificationPreference',
-        backref='user',
+        backref='preference_user',
         lazy=True,
         uselist=False
     )
-    messages_sent = db.relationship('Message', foreign_keys='Message.sender_id', backref='sender', lazy='dynamic')
-    messages_received = db.relationship('Message', foreign_keys='Message.receiver_id', backref='receiver', lazy='dynamic')
-    bookings = db.relationship('Booking', backref='user_profile', lazy='dynamic')
-    events = db.relationship('Event', foreign_keys='Event.organizer_id', backref='organizer', lazy='dynamic')
+    messages_sent = db.relationship(
+        'Message',
+        foreign_keys='Message.sender_id',
+        backref='message_sender',
+        lazy='dynamic'
+    )
+    messages_received = db.relationship(
+        'Message',
+        foreign_keys='Message.receiver_id',
+        backref='message_receiver',
+        lazy='dynamic'
+    )
+    bookings = db.relationship('Booking', backref='booking_user', lazy='dynamic')
+    events = db.relationship(
+        'Event',
+        foreign_keys='Event.organizer_id',
+        backref='event_organizer',
+        lazy='dynamic'
+    )
+    system_backups = db.relationship('SystemBackup', backref='backup_user', lazy=True)
+    reviews = db.relationship('Review', backref='review_user', lazy=True)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -152,17 +169,7 @@ class Message(db.Model):
     read = db.Column(db.Boolean, default=False)
 
     # Relationships
-    sender = db.relationship(
-        'User',
-        foreign_keys=[sender_id],
-        backref=db.backref('messages_sent', lazy='dynamic')
-    )
-    receiver = db.relationship(
-        'User',
-        foreign_keys=[receiver_id],
-        backref=db.backref('messages_received', lazy='dynamic')
-    )
-    event = db.relationship('Event', backref=db.backref('messages', lazy='dynamic'))
+    event = db.relationship('Event', backref='event_messages', lazy='dynamic')
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -176,8 +183,7 @@ class Notification(db.Model):
     error = db.Column(db.Text, nullable=True)
 
     # Relationships
-    user = db.relationship('User', backref=db.backref('notifications', lazy='dynamic'))
-    event = db.relationship('Event', backref=db.backref('notifications', lazy='dynamic'))
+    event = db.relationship('Event', backref='event_notifications', lazy='dynamic')
 
 class NotificationPreference(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -202,8 +208,7 @@ class Review(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
-    user = db.relationship('User', backref=db.backref('reviews', lazy=True))
-    event = db.relationship('Event', backref=db.backref('reviews', lazy=True))
+    event = db.relationship('Event', backref='event_reviews', lazy=True)
 
 @login_manager.user_loader
 def load_user(id):
