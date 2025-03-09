@@ -939,6 +939,66 @@ def messages():
         sent_messages=sent_messages
     )
 
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(username=email).first()
+        
+        if user:
+            # Generate reset token
+            token = generate_reset_token(user)
+            
+            # Send reset email
+            try:
+                send_reset_email(user, token)
+                flash('Password reset instructions have been sent to your email.', 'success')
+                return redirect(url_for('login'))
+            except Exception as e:
+                logger.error(f"Error sending reset email: {str(e)}")
+                flash('Error sending reset email. Please try again later.', 'error')
+        else:
+            # Don't reveal if user exists
+            flash('If an account exists with this email, you will receive password reset instructions.', 'info')
+        
+        return redirect(url_for('forgot_password'))
+    
+    return render_template('forgot_password.html')
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        email = serializer.loads(token, salt='password-reset-salt', max_age=3600)  # Token valid for 1 hour
+        user = User.query.filter_by(username=email).first()
+        
+        if not user:
+            flash('Invalid or expired reset link.', 'error')
+            return redirect(url_for('login'))
+        
+        if request.method == 'POST':
+            password = request.form.get('password')
+            confirm_password = request.form.get('confirm_password')
+            
+            if not password or not confirm_password:
+                flash('Please fill in all fields.', 'error')
+            elif password != confirm_password:
+                flash('Passwords do not match.', 'error')
+            elif len(password) < 6:
+                flash('Password must be at least 6 characters long.', 'error')
+            else:
+                user.password = generate_password_hash(password)
+                db.session.commit()
+                flash('Your password has been reset successfully.', 'success')
+                return redirect(url_for('login'))
+                
+        return render_template('reset_password.html')
+        
+    except Exception as e:
+        logger.error(f"Error in reset_password: {str(e)}")
+        flash('Invalid or expired reset link.', 'error')
+        return redirect(url_for('login'))
+
 # Initialize the application
 init_app()
 
