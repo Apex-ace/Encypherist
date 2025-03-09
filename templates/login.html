@@ -93,36 +93,18 @@
             box-shadow: 0 4px 20px rgba(15, 164, 175, 0.4);
         }
 
-        .form-check-input {
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(175, 221, 229, 0.3);
-            cursor: pointer;
-        }
-
-        .form-check-input:checked {
-            background-color: #0FA4AF;
-            border-color: #0FA4AF;
-        }
-
-        .form-check-label {
-            color: #AFDDE5;
-            cursor: pointer;
-        }
-
-        .text-accent {
-            color: #0FA4AF;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .text-accent:hover {
-            color: #AFDDE5;
-        }
-
         @keyframes gradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+        }
+
+        .text-accent {
+            color: #0FA4AF;
+        }
+
+        .text-accent:hover {
+            color: #AFDDE5;
         }
     </style>
 </head>
@@ -137,7 +119,7 @@
 
         <div class="glass w-full max-w-md">
             <h2 class="text-3xl font-bold mb-6 text-center gradient-text">Welcome Back!</h2>
-            
+
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -176,22 +158,10 @@
                 </button>
             </form>
 
-            <div class="mt-8 text-center">
-                <p class="text-gray-400">
-                    Don't have an account? 
-                    <a href="{{ url_for('register') }}" class="text-accent">Register here</a>
-                </p>
-            </div>
-
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-400 mb-4">Or sign in with</p>
-                <a href="{{ url_for('google_login') }}" class="btn-primary flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12.545,12.151L12.545,12.151c0,1.054,0.855,1.909,1.909,1.909h3.536c-0.607,1.972-2.405,3.404-4.545,3.404c-2.627,0-4.545-2.127-4.545-4.545s2.127-4.545,4.545-4.545c1.127,0,2.163,0.399,2.972,1.063l2.595-2.595C16.823,4.968,14.555,4,12,4C7.037,4,3,8.037,3,13s4.037,9,9,9s9-4.037,9-9v-1.909h-7.455C12.69,11.091,12.545,11.597,12.545,12.151z"/>
-                    </svg>
-                    Continue with Google
-                </a>
-            </div>
+            <p class="mt-8 text-center text-gray-400">
+                Don't have an account? 
+                <a href="{{ url_for('register') }}" class="text-accent">Register here</a>
+            </p>
         </div>
     </div>
 </body>
