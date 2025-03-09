@@ -331,86 +331,79 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+.route('/login', methods=['GET', 'POST'])
 def login():
-    # Redirect if already logged in
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-        
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        remember = request.form.get('remember') == 'on'
+        remember = bool(request.form.get('remember'))
         
-        logger.info(f"Login attempt for username: {username}")
+        app.logger.info(f"Login attempt for username: {username}")
         
-        if not username or not password:
-            logger.warning("Login attempt with missing credentials")
-            flash('Please provide both username and password', 'error')
-            return redirect(url_for('login'))
+        user = User.query.filter_by(email=username).first()
         
-        try:
-            user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user, remember=remember)
+            app.logger.info(f"Successful login for user: {username}")
             
-            if user and check_password_hash(user.password, password):
-                login_user(user, remember=remember)
-                logger.info(f"Successful login for user: {username}")
-                flash('Logged in successfully!', 'success')
-                
-                # Log the activity
-                activity = UserActivity(
-                    user_id=user.id,
-                    activity_type='login',
-                    description=f'User logged in from {request.remote_addr}',
-                    ip_address=request.remote_addr
-                )
-                db.session.add(activity)
-                db.session.commit()
-                
-                # Get the next page from args or default to home
-                next_page = request.args.get('next')
-                if next_page and url_for('static', filename='') not in next_page:
-                    return redirect(next_page)
-                    
-                # Redirect based on user role
-                if user.role == 'admin':
-                    return redirect(url_for('admin_dashboard'))
-                return redirect(url_for('home'))
+            # Log the login activity safely
+            if not log_user_activity(
+                user.id,
+                'login',
+                f'User logged in from {request.remote_addr}',
+                request.remote_addr
+            ):
+                app.logger.warning(f"Failed to log login activity for user {username}")
             
-            logger.warning(f"Failed login attempt for username: {username}")
-            flash('Invalid username or password', 'error')
-            return redirect(url_for('login'))
-            
-        except Exception as e:
-            logger.error(f"Database error during login: {str(e)}")
-            db.session.rollback()
-            flash('An error occurred during login. Please try again.', 'error')
-            return redirect(url_for('login'))
+            next_page = request.args.get('next')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('home')
+            return redirect(next_page)
+        
+        flash('Invalid username or password', 'error')
+        return redirect(url_for('login'))
     
     return render_template('login.html')
 
-@app.route('/logout', methods=['POST'])
-@login_required
-def logout():
-    try:
-        # Log the activity before logging out
-        activity = UserActivity(
-            user_id=current_user.id,
-            activity_type='logout',
-            description=f'User logged out from {request.remote_addr}',
-            ip_address=request.remote_addr
-        )
-        db.session.add(activity)
-        db.session.commit()
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        remember = bool(request.form.get('remember'))
         
-        # Perform logout
-        logout_user()
-        flash('You have been logged out successfully.', 'success')
-    except Exception as e:
-        logger.error(f"Error during logout: {str(e)}")
-        flash('An error occurred during logout.', 'error')
+        app.logger.info(f"Login attempt for username: {username}")
+        
+        user = User.query.filter_by(email=username).first()
+        
+        if user and check_password_hash(user.password, password):
+            login_user(user, remember=remember)
+            app.logger.info(f"Successful login for user: {username}")
+            
+            # Log the login activity safely
+            if not log_user_activity(
+                user.id,
+                'login',
+                f'User logged in from {request.remote_addr}',
+                request.remote_addr
+            ):
+                app.logger.warning(f"Failed to log login activity for user {username}")
+            
+            next_page = request.args.get('next')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('home')
+            return redirect(next_page)
+        
+        flash('Invalid username or password', 'error')
+        return redirect(url_for('login'))
     
-    return redirect(url_for('landing'))
+    return render_template('login.html')
 
 @app.route('/home')
 @login_required
@@ -998,6 +991,37 @@ def reset_password(token):
         logger.error(f"Error in reset_password: {str(e)}")
         flash('Invalid or expired reset link.', 'error')
         return redirect(url_for('login'))
+
+@app.route('/user_notifications')
+@login_required
+def user_notifications():
+    """Handle user notifications"""
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    return render_template('notifications.html', notifications=notifications)
+
+def log_user_activity(user_id, activity_type, description, ip_address):
+    """Log user activity with validation"""
+    try:
+        # First check if user exists
+        user = User.query.get(user_id)
+        if not user:
+            app.logger.error(f"Attempted to log activity for non-existent user ID: {user_id}")
+            return False
+            
+        activity = UserActivity(
+            user_id=user_id,
+            activity_type=activity_type,
+            description=description,
+            timestamp=datetime.utcnow(),
+            ip_address=ip_address
+        )
+        db.session.add(activity)
+        db.session.commit()
+        return True
+    except Exception as e:
+        app.logger.error(f"Error logging user activity: {str(e)}")
+        db.session.rollback()
+        return False
 
 # Initialize the application
 init_app()

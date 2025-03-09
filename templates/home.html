@@ -143,7 +143,7 @@
                         <a href="{{ url_for('create_event') }}" class="btn btn-primary">Create Event</a>
                     {% endif %}
                     <a href="{{ url_for('messages') }}" class="hover:text-blue-400 transition">Messages</a>
-                    <a href="{{ url_for('notifications') }}" class="hover:text-blue-400 transition">Notifications</a>
+                    <a href="{{ url_for('user_notifications') }}" class="hover:text-blue-400 transition">Notifications</a>
                     <div class="relative group">
                         <button class="flex items-center space-x-2 hover:text-blue-400 transition">
                             <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) if current_user.profile_picture else 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}"
