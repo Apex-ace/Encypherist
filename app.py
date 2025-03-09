@@ -89,13 +89,13 @@ class User(UserMixin, db.Model):
         backref='message_receiver',
         lazy='dynamic'
     )
-    bookings = db.relationship('Booking', backref='booking_user', lazy='dynamic')
-    events = db.relationship(
+    organized_events = db.relationship(
         'Event',
         foreign_keys='Event.organizer_id',
-        backref='event_organizer',
+        backref='organizer',
         lazy='dynamic'
     )
+    bookings = db.relationship('Booking', backref='user', lazy='dynamic')
     system_backups = db.relationship('SystemBackup', backref='backup_user', lazy=True)
     reviews = db.relationship('Review', backref='review_user', lazy=True)
 
@@ -117,10 +117,10 @@ class Event(db.Model):
     max_group_size = db.Column(db.Integer, default=1)
     
     # Relationships
-    organizer = db.relationship('User', foreign_keys=[organizer_id])
     bookings = db.relationship('Booking', backref='event', lazy=True)
     notifications = db.relationship('Notification', backref='event', lazy='dynamic')
     messages = db.relationship('Message', backref='event', lazy='dynamic')
+    reviews = db.relationship('Review', backref='event', lazy=True)
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -337,16 +337,21 @@ def register():
         return redirect(url_for('home'))
         
     if request.method == 'POST':
-        username = request.form.get('username')
+        email = request.form.get('username')  # Form field is named username but expects email
         password = request.form.get('password')
         role = request.form.get('role')
 
-        if not username or not password or not role:
+        if not email or not password or not role:
             flash('Please fill in all fields', 'error')
             return redirect(url_for('register'))
 
-        if User.query.filter_by(username=username).first():
-            flash('Username already exists', 'error')
+        # Validate email format
+        if '@' not in email or '.' not in email:
+            flash('Please enter a valid email address', 'error')
+            return redirect(url_for('register'))
+
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered', 'error')
             return redirect(url_for('register'))
 
         if len(password) < 6:
@@ -359,11 +364,30 @@ def register():
 
         try:
             hashed_password = generate_password_hash(password)
-            user = User(username=username, password=hashed_password, role=role)
+            # Extract username from email
+            username = email.split('@')[0]
+            base_username = username
+            counter = 1
+            
+            # Ensure username is unique
+            while User.query.filter_by(username=username).first():
+                username = f"{base_username}{counter}"
+                counter += 1
+            
+            user = User(
+                username=username,
+                email=email,
+                password=hashed_password,
+                role=role,
+                created_at=datetime.utcnow()
+            )
             db.session.add(user)
             
             # Create notification preferences
-            prefs = NotificationPreference(user_id=user.id)
+            prefs = NotificationPreference(
+                user_id=user.id,
+                email=email
+            )
             db.session.add(prefs)
             
             # Log the activity
@@ -393,17 +417,24 @@ def login():
         return redirect(url_for('home'))
 
     if request.method == 'POST':
-        username = request.form.get('username')
+        email = request.form.get('username')  # Form field is named username but expects email
         password = request.form.get('password')
         remember = bool(request.form.get('remember'))
         
-        app.logger.info(f"Login attempt for username: {username}")
+        if not email or not password:
+            flash('Please enter both email and password', 'error')
+            return redirect(url_for('login'))
         
-        user = User.query.filter_by(email=username).first()
+        app.logger.info(f"Login attempt for email: {email}")
+        
+        user = User.query.filter_by(email=email).first()
         
         if user and check_password_hash(user.password, password):
+            # Update last login time
+            user.last_login = datetime.utcnow()
+            
             login_user(user, remember=remember)
-            app.logger.info(f"Successful login for user: {username}")
+            app.logger.info(f"Successful login for user: {email}")
             
             # Log the login activity safely
             if not log_user_activity(
@@ -412,14 +443,21 @@ def login():
                 f'User logged in from {request.remote_addr}',
                 request.remote_addr
             ):
-                app.logger.warning(f"Failed to log login activity for user {username}")
+                app.logger.warning(f"Failed to log login activity for user {email}")
+            
+            # Save the changes to last_login
+            try:
+                db.session.commit()
+            except Exception as e:
+                app.logger.error(f"Failed to update last login time: {str(e)}")
+                db.session.rollback()
             
             next_page = request.args.get('next')
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('home')
             return redirect(next_page)
         
-        flash('Invalid username or password', 'error')
+        flash('Invalid email or password', 'error')
         return redirect(url_for('login'))
     
     return render_template('login.html')
@@ -535,13 +573,13 @@ def create_event():
 
         if request.method == 'POST':
             # Get form data with validation
-            title = request.form.get('title')
-            description = request.form.get('description')
-            location = request.form.get('location')
+            title = request.form.get('title', '').strip()
+            description = request.form.get('description', '').strip()
+            location = request.form.get('location', '').strip()
             price = request.form.get('price')
             date_str = request.form.get('date')
             total_tickets = request.form.get('total_tickets')
-            category = request.form.get('category')
+            category = request.form.get('category', '').strip()
             is_group_event = 'is_group_event' in request.form
 
             # Validate required fields
@@ -549,12 +587,20 @@ def create_event():
                 flash('Please fill in all required fields', 'error')
                 return redirect(url_for('create_event'))
 
+            # Validate title length
+            if len(title) < 5 or len(title) > 200:
+                flash('Title must be between 5 and 200 characters', 'error')
+                return redirect(url_for('create_event'))
+
             # Convert and validate numeric fields
             try:
                 price = float(price)
                 total_tickets = int(total_tickets)
-                if price < 0 or total_tickets < 1:
-                    flash('Price and total tickets must be positive numbers', 'error')
+                if price < 0:
+                    flash('Price must be a positive number', 'error')
+                    return redirect(url_for('create_event'))
+                if total_tickets < 1:
+                    flash('Total tickets must be at least 1', 'error')
                     return redirect(url_for('create_event'))
             except ValueError:
                 flash('Invalid price or ticket quantity', 'error')
@@ -577,12 +623,23 @@ def create_event():
                 try:
                     min_group_size = int(request.form.get('min_group_size', 2))
                     max_group_size = int(request.form.get('max_group_size', 10))
-                    if min_group_size < 2 or max_group_size < min_group_size:
-                        flash('Invalid group size settings', 'error')
+                    if min_group_size < 2:
+                        flash('Minimum group size must be at least 2', 'error')
+                        return redirect(url_for('create_event'))
+                    if max_group_size < min_group_size:
+                        flash('Maximum group size must be greater than minimum size', 'error')
                         return redirect(url_for('create_event'))
                 except ValueError:
                     flash('Invalid group size values', 'error')
                     return redirect(url_for('create_event'))
+
+            # Handle event poster upload
+            poster_filename = None
+            if 'poster' in request.files:
+                poster = request.files['poster']
+                if poster and allowed_file(poster.filename):
+                    poster_filename = secure_filename(f"{title.lower().replace(' ', '_')}_{int(time.time())}.{poster.filename.rsplit('.', 1)[1].lower()}")
+                    poster.save(os.path.join(app.config['UPLOAD_FOLDER'], 'posters', poster_filename))
 
             # Create event
             event = Event(
@@ -610,11 +667,21 @@ def create_event():
                 ip_address=request.remote_addr
             )
             
+            # Create notification for event creation
+            notification = Notification(
+                user_id=current_user.id,
+                type='event_created',
+                title='Event Created',
+                content=f'Your event "{title}" has been created and is pending approval.',
+                timestamp=datetime.utcnow()
+            )
+            
             db.session.add(event)
             db.session.add(activity)
+            db.session.add(notification)
             db.session.commit()
             
-            flash('Event created successfully!', 'success')
+            flash('Event created successfully! It will be visible after approval.', 'success')
             return redirect(url_for('organizer_profile'))
 
         return render_template('create_event.html')
