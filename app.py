@@ -69,24 +69,24 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True)
     
     # Relationships
-    activities = db.relationship('UserActivity', backref='activity_user', lazy=True)
-    notifications = db.relationship('Notification', backref='notification_user', lazy='dynamic')
+    activities = db.relationship('UserActivity', backref='user', lazy=True)
+    notifications = db.relationship('Notification', backref='user', lazy='dynamic')
     preferences = db.relationship(
         'NotificationPreference',
-        backref='preference_user',
+        backref='user',
         lazy=True,
         uselist=False
     )
     messages_sent = db.relationship(
         'Message',
         foreign_keys='Message.sender_id',
-        backref='message_sender',
+        backref='sender',
         lazy='dynamic'
     )
     messages_received = db.relationship(
         'Message',
         foreign_keys='Message.receiver_id',
-        backref='message_receiver',
+        backref='receiver',
         lazy='dynamic'
     )
     organized_events = db.relationship(
@@ -96,8 +96,8 @@ class User(UserMixin, db.Model):
         lazy='dynamic'
     )
     bookings = db.relationship('Booking', backref='user', lazy='dynamic')
-    system_backups = db.relationship('SystemBackup', backref='backup_user', lazy=True)
-    reviews = db.relationship('Review', backref='review_user', lazy=True)
+    system_backups = db.relationship('SystemBackup', backref='user', lazy=True)
+    reviews = db.relationship('Review', backref='user', lazy=True)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -118,9 +118,9 @@ class Event(db.Model):
     
     # Relationships
     bookings = db.relationship('Booking', backref='event', lazy=True)
-    notifications = db.relationship('Notification', backref='event_notification', lazy='dynamic')
-    messages = db.relationship('Message', backref='event_message', lazy='dynamic')
-    reviews = db.relationship('Review', backref='event_review', lazy=True)
+    notifications = db.relationship('Notification', backref='event', lazy='dynamic')
+    messages = db.relationship('Message', backref='event', lazy='dynamic')
+    reviews = db.relationship('Review', backref='event', lazy=True)
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -136,9 +136,6 @@ class Booking(db.Model):
     mobile = db.Column(db.String(20))
     branch = db.Column(db.String(50))
     year = db.Column(db.String(10))
-    
-    # Relationships
-    user_profile = db.relationship('User', backref='bookings')
 
 class UserActivity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -156,9 +153,6 @@ class SystemBackup(db.Model):
     size = db.Column(db.Integer)  # Size in bytes
     status = db.Column(db.String(20), default='completed')  # started, completed, failed
 
-    # Relationships
-    user = db.relationship('User', backref=db.backref('backups', lazy=True))
-
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -167,9 +161,6 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     read = db.Column(db.Boolean, default=False)
-
-    # Relationships
-    event = db.relationship('Event', backref='event_messages', lazy='dynamic')
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -193,9 +184,6 @@ class NotificationPreference(db.Model):
     email = db.Column(db.String(120), nullable=True)
     phone = db.Column(db.String(20), nullable=True)
 
-    # Relationships
-    user = db.relationship('User', backref=db.backref('notification_preferences', uselist=False))
-
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -203,9 +191,6 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
     review_text = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # Relationships
-    event = db.relationship('Event', backref='event_reviews', lazy=True)
 
 @login_manager.user_loader
 def load_user(id):
