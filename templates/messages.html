@@ -2,127 +2,102 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8">Messages</h1>
-        
-        <!-- Messages Tabs -->
-        <div class="mb-6">
-            <div class="border-b border-gray-200">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button onclick="showTab('received')" class="tab-button border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600">
-                        Received Messages
-                    </button>
-                    <button onclick="showTab('sent')" class="tab-button border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                        Sent Messages
-                    </button>
-                </nav>
+    <div class="glass p-8">
+        <h2 class="text-3xl font-bold mb-8 text-center gradient-text">Messages</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-lg bg-{{ category if category != 'message' else 'info' }}-500 bg-opacity-20 text-{{ category if category != 'message' else 'info' }}-200 text-center">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Tabs -->
+        <div class="mb-8">
+            <div class="flex border-b border-gray-700">
+                <button class="px-6 py-3 text-lg font-medium border-b-2 border-blue-500" onclick="showTab('received')">
+                    Received Messages
+                </button>
+                <button class="px-6 py-3 text-lg font-medium opacity-60 hover:opacity-100" onclick="showTab('sent')">
+                    Sent Messages
+                </button>
             </div>
         </div>
 
         <!-- Received Messages -->
-        <div id="received-tab" class="tab-content">
+        <div id="received-messages" class="space-y-4">
             {% if received_messages %}
-                <div class="space-y-4">
-                    {% for message in received_messages %}
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <div class="flex justify-between items-start">
+                {% for message in received_messages %}
+                    <div class="glass p-4 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
                             <div>
-                                <p class="font-semibold">{{ message.sender.username }}</p>
-                                <p class="text-gray-600 text-sm">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                                <p class="font-medium">From: {{ message.sender.username }}</p>
+                                <p class="text-sm text-gray-400">{{ message.timestamp.strftime('%B %d, %Y %I:%M %p') }}</p>
                             </div>
                             {% if message.event %}
-                            <span class="text-sm text-blue-600">Re: {{ message.event.title }}</span>
+                                <a href="{{ url_for('event_details', event_id=message.event.id) }}" 
+                                   class="text-sm text-blue-400 hover:text-blue-300">
+                                    Related Event
+                                </a>
                             {% endif %}
                         </div>
-                        <p class="mt-2">{{ message.content }}</p>
+                        <p class="text-gray-300">{{ message.content }}</p>
                     </div>
-                    {% endfor %}
-                </div>
+                {% endfor %}
             {% else %}
-                <p class="text-gray-500">No received messages.</p>
+                <p class="text-center text-gray-400">No received messages</p>
             {% endif %}
         </div>
 
         <!-- Sent Messages -->
-        <div id="sent-tab" class="tab-content hidden">
+        <div id="sent-messages" class="space-y-4 hidden">
             {% if sent_messages %}
-                <div class="space-y-4">
-                    {% for message in sent_messages %}
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <div class="flex justify-between items-start">
+                {% for message in sent_messages %}
+                    <div class="glass p-4 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
                             <div>
-                                <p class="font-semibold">To: {{ message.receiver.username }}</p>
-                                <p class="text-gray-600 text-sm">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                                <p class="font-medium">To: {{ message.receiver.username }}</p>
+                                <p class="text-sm text-gray-400">{{ message.timestamp.strftime('%B %d, %Y %I:%M %p') }}</p>
                             </div>
                             {% if message.event %}
-                            <span class="text-sm text-blue-600">Re: {{ message.event.title }}</span>
+                                <a href="{{ url_for('event_details', event_id=message.event.id) }}" 
+                                   class="text-sm text-blue-400 hover:text-blue-300">
+                                    Related Event
+                                </a>
                             {% endif %}
                         </div>
-                        <p class="mt-2">{{ message.content }}</p>
+                        <p class="text-gray-300">{{ message.content }}</p>
                     </div>
-                    {% endfor %}
-                </div>
+                {% endfor %}
             {% else %}
-                <p class="text-gray-500">No sent messages.</p>
+                <p class="text-center text-gray-400">No sent messages</p>
             {% endif %}
-        </div>
-
-        <!-- Send Message Form -->
-        <div class="mt-8 bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-semibold mb-4">Send New Message</h2>
-            <form action="{{ url_for('send_message') }}" method="POST" class="space-y-4">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div>
-                    <label for="receiver" class="block text-sm font-medium text-gray-700">To</label>
-                    <select name="receiver_id" id="receiver" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <option value="">Select recipient</option>
-                        {% for user in users %}
-                        {% if user.id != current_user.id %}
-                        <option value="{{ user.id }}">{{ user.username }}</option>
-                        {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label for="event" class="block text-sm font-medium text-gray-700">Event (Optional)</label>
-                    <select name="event_id" id="event" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <option value="">Select event</option>
-                        {% for event in events %}
-                        <option value="{{ event.id }}">{{ event.title }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label for="content" class="block text-sm font-medium text-gray-700">Message</label>
-                    <textarea name="content" id="content" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-                </div>
-                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Send Message
-                </button>
-            </form>
         </div>
     </div>
 </div>
 
 <script>
-function showTab(tabName) {
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
+function showTab(tab) {
+    // Hide all message containers
+    document.getElementById('received-messages').classList.add('hidden');
+    document.getElementById('sent-messages').classList.add('hidden');
+    
+    // Show selected container
+    document.getElementById(tab + '-messages').classList.remove('hidden');
+    
+    // Update tab styles
+    const tabs = document.querySelectorAll('.flex.border-b button');
+    tabs.forEach(t => {
+        t.classList.remove('border-b-2', 'border-blue-500');
+        t.classList.add('opacity-60');
     });
     
-    // Remove active state from all tab buttons
-    document.querySelectorAll('.tab-button').forEach(button => {
-        button.classList.remove('border-blue-500', 'text-blue-600');
-        button.classList.add('border-transparent', 'text-gray-500');
-    });
-    
-    // Show selected tab content
-    document.getElementById(tabName + '-tab').classList.remove('hidden');
-    
-    // Add active state to selected tab button
-    event.target.classList.remove('border-transparent', 'text-gray-500');
-    event.target.classList.add('border-blue-500', 'text-blue-600');
+    // Highlight active tab
+    event.target.classList.remove('opacity-60');
+    event.target.classList.add('border-b-2', 'border-blue-500');
 }
 </script>
 {% endblock %} 

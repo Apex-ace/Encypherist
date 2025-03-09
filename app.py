@@ -920,6 +920,25 @@ def organizer_profile():
         flash('An error occurred while loading your profile', 'error')
         return redirect(url_for('home'))
 
+@app.route('/messages')
+@login_required
+def messages():
+    # Get all messages for the current user
+    received_messages = Message.query.filter_by(receiver_id=current_user.id).order_by(Message.timestamp.desc()).all()
+    sent_messages = Message.query.filter_by(sender_id=current_user.id).order_by(Message.timestamp.desc()).all()
+    
+    # Mark unread messages as read
+    for message in received_messages:
+        if not message.read:
+            message.read = True
+    db.session.commit()
+    
+    return render_template(
+        'messages.html',
+        received_messages=received_messages,
+        sent_messages=sent_messages
+    )
+
 # Initialize the application
 init_app()
 
