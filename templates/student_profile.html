@@ -1,30 +1,70 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="animated-bg"></div>
+
+<div class="container mt-5 px-4">
     <div class="row">
-        <!-- User Profile Section -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Profile Information</h5>
-                    <p class="card-text">
-                        <strong>Username:</strong> {{ user.username }}<br>
-                        <strong>Role:</strong> {{ user.role|title }}
-                    </p>
-                    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+        <!-- Profile Overview -->
+        <div class="col-md-4 mb-4">
+            <div class="card glass">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        {% if user.profile_picture %}
+                            <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) }}" 
+                                 alt="Profile Picture" 
+                                 class="rounded-circle profile-picture mb-3">
+                        {% else %}
+                            <div class="default-avatar mb-3">
+                                {{ user.username[0].upper() }}
+                            </div>
+                        {% endif %}
+                        <h3 class="gradient-text">{{ user.username }}</h3>
+                        <p class="text-muted">Student</p>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">{{ bookings|length }}</span>
+                            <span class="stat-label">Events Booked</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ reviews|length }}</span>
+                            <span class="stat-label">Reviews</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Bookings Section -->
+        <!-- Bookings and Reviews -->
         <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">My Bookings</h5>
-                    {% if bookings %}
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show mb-4">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Upcoming Events -->
+            <div class="card glass mb-4">
+                <div class="card-body p-4">
+                    <h4 class="gradient-text mb-4">Upcoming Events</h4>
+                    {% set upcoming_events = [] %}
+                    {% for booking in bookings %}
+                        {% if booking.event.date > now %}
+                            {% set _ = upcoming_events.append(booking) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if upcoming_events %}
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-dark table-hover">
                                 <thead>
                                     <tr>
                                         <th>Event</th>
@@ -34,55 +74,204 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for booking, event in bookings %}
-                                        <tr>
-                                            <td>{{ event.title }}</td>
-                                            <td>{{ event.date.strftime('%Y-%m-%d %H:%M') }}</td>
-                                            <td>
-                                                <span class="badge {% if booking.payment_status == 'succeeded' %}bg-success{% else %}bg-warning{% endif %}">
-                                                    {{ booking.payment_status|title }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                {% if booking.payment_status == 'succeeded' %}
-                                                    <a href="{{ url_for('ticket', event_id=event.id) }}" class="btn btn-sm btn-primary">View Ticket</a>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
+                                    {% for booking in upcoming_events %}
+                                    <tr>
+                                        <td>{{ booking.event.title }}</td>
+                                        <td>{{ booking.event.date.strftime('%B %d, %Y') }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if booking.status == 'confirmed' else 'warning' }}">
+                                                {{ booking.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('view_ticket', booking_id=booking.id) }}" 
+                                               class="btn btn-glow btn-sm">View Ticket</a>
+                                        </td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     {% else %}
-                        <p class="text-muted">No bookings found.</p>
+                        <p class="text-muted text-center">No upcoming events</p>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Reviews Section -->
-            {% if reviews %}
-                <div class="card mt-4">
-                    <div class="card-body">
-                        <h5 class="card-title">My Reviews</h5>
-                        <div class="list-group">
-                            {% for review, event in reviews %}
-                                <div class="list-group-item">
-                                    <h6 class="mb-1">{{ event.title }}</h6>
-                                    <p class="mb-1">
-                                        Rating: 
-                                        {% for i in range(review.rating) %}
-                                            ⭐
-                                        {% endfor %}
-                                    </p>
-                                    <p class="mb-1">{{ review.review_text }}</p>
-                                    <small class="text-muted">{{ review.created_at.strftime('%Y-%m-%d') }}</small>
-                                </div>
-                            {% endfor %}
+            <!-- Past Events -->
+            <div class="card glass">
+                <div class="card-body p-4">
+                    <h4 class="gradient-text mb-4">Past Events</h4>
+                    {% set past_events = [] %}
+                    {% for booking in bookings %}
+                        {% if booking.event.date <= now %}
+                            {% set _ = past_events.append(booking) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if past_events %}
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booking in past_events %}
+                                    <tr>
+                                        <td>{{ booking.event.title }}</td>
+                                        <td>{{ booking.event.date.strftime('%B %d, %Y') }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if booking.status == 'confirmed' else 'secondary' }}">
+                                                {{ booking.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('event_details', event_id=booking.event.id) }}" 
+                                               class="btn btn-outline-info btn-sm">View Details</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
+                    {% else %}
+                        <p class="text-muted text-center">No past events</p>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.animated-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: 
+        radial-gradient(circle at 15% 50%, rgba(15, 164, 175, 0.15) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(175, 221, 229, 0.15) 0%, transparent 25%);
+    animation: bgAnimation 15s ease infinite alternate;
+}
+
+@keyframes bgAnimation {
+    0% { transform: scale(1) rotate(0deg); }
+    100% { transform: scale(1.2) rotate(5deg); }
+}
+
+.glass {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(175, 221, 229, 0.2);
+    border-radius: 24px;
+}
+
+.gradient-text {
+    background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 300% 300%;
+    animation: gradient 8s ease infinite;
+}
+
+.profile-picture {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid rgba(175, 221, 229, 0.3);
+}
+
+.default-avatar {
+    width: 120px;
+    height: 120px;
+    line-height: 120px;
+    font-size: 48px;
+    background: linear-gradient(45deg, #0FA4AF, #AFDDE5);
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(15, 164, 175, 0.1);
+    border-radius: 16px;
+    border: 1px solid rgba(175, 221, 229, 0.2);
+}
+
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 600;
+    color: #0FA4AF;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #AFDDE5;
+    font-size: 14px;
+}
+
+.btn-glow {
+    background: linear-gradient(45deg, #0FA4AF, #AFDDE5);
+    border: none;
+    color: #000;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(15, 164, 175, 0.4);
+}
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.table thead th {
+    border-bottom: none;
+    color: #AFDDE5;
+    font-weight: 500;
+    padding: 1rem;
+}
+
+.table tbody tr {
+    background: rgba(15, 164, 175, 0.1);
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    transform: translateY(-2px);
+    background: rgba(15, 164, 175, 0.2);
+}
+
+.table td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+</style>
 {% endblock %} 

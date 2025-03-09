@@ -1,19 +1,92 @@
-<div class="flex space-x-4">
-    {% if event.tickets_remaining > 0 %}
-        <a href="{{ url_for('book_event', event_id=event.id) }}" 
-           class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">
-            Book Now
-        </a>
-        {% if event.is_group_event %}
-            <a href="{{ url_for('book_group', event_id=event.id) }}"
-               class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center">
-                <i class="fas fa-users mr-2"></i>
-                Group Booking
-            </a>
-        {% endif %}
-    {% else %}
-        <button disabled class="bg-gray-600 text-gray-300 font-semibold py-3 px-6 rounded-lg cursor-not-allowed">
-            Sold Out
-        </button>
-    {% endif %}
-</div> 
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ event.title }}</h2>
+                    <p class="text-muted">
+                        <strong>Date:</strong> {{ event.date.strftime('%Y-%m-%d %H:%M') if event.date else 'TBA' }}<br>
+                        <strong>Venue:</strong> {{ event.venue }}<br>
+                        <strong>Category:</strong> {{ event.category }}<br>
+                        <strong>Price:</strong> ₹{{ event.price }}
+                    </p>
+                    
+                    <hr>
+                    
+                    <h5>Description</h5>
+                    <p>{{ event.description }}</p>
+                    
+                    <div class="mt-4">
+                        <h5>Event Status</h5>
+                        <p>
+                            <span class="badge {% if event.status == 'approved' %}bg-success{% else %}bg-warning{% endif %}">
+                                {{ event.status|title }}
+                            </span>
+                        </p>
+                        <p>
+                            <strong>Available Tickets:</strong> {{ event.remaining_tickets }}/{{ event.total_tickets }}
+                        </p>
+                    </div>
+                    
+                    {% if event.status == 'approved' and event.remaining_tickets > 0 %}
+                        <div class="mt-4">
+                            <a href="{{ url_for('book_event', event_id=event.id) }}" class="btn btn-primary">Book Now</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Reviews</h5>
+                    {% if event.reviews %}
+                        <div class="list-group">
+                            {% for review in event.reviews %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">{{ review.user.username }}</h6>
+                                        <small class="text-muted">{{ review.created_at.strftime('%Y-%m-%d') }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ review.content }}</p>
+                                    <small class="text-muted">Rating: {{ review.rating }}/5</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No reviews yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Organizer Info -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Organizer</h5>
+                    <p class="card-text">
+                        <strong>Name:</strong> {{ event.organizer.username }}<br>
+                        <strong>Contact:</strong> {{ event.organizer.email }}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Additional Info -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Additional Information</h5>
+                    <ul class="list-unstyled">
+                        <li>✓ Ticket confirmation via email</li>
+                        <li>✓ Digital ticket with QR code</li>
+                        <li>✓ Secure payment process</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

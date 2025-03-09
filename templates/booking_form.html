@@ -1,235 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encypherist - Book Event</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(45deg, #000000, #1a1a1a);
-            color: white;
-            min-height: 100vh;
-            position: relative;
-            overflow: hidden;
-        }
+{% extends "base.html" %}
 
-        .animated-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            background: 
-                radial-gradient(circle at 15% 50%, rgba(15, 164, 175, 0.15) 0%, transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(175, 221, 229, 0.15) 0%, transparent 25%);
-            animation: bgAnimation 15s ease infinite alternate;
-        }
-
-        .glass {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(175, 221, 229, 0.2);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(15, 164, 175, 0.2);
-        }
-
-        .gradient-text {
-            background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 300% 300%;
-            animation: gradient 8s ease infinite;
-        }
-
-        .form-input {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(175, 221, 229, 0.3);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            color: white;
-        }
-
-        .form-input:focus {
-            background: rgba(15, 164, 175, 0.1);
-            border-color: #AFDDE5;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(175, 221, 229, 0.2);
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #0FA4AF, #AFDDE5, #0FA4AF);
-            border: none;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            background-size: 300% 300%;
-            animation: gradient 8s ease infinite;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(15, 164, 175, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(175, 221, 229, 0.3);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(15, 164, 175, 0.1);
-            border-color: #AFDDE5;
-            color: #AFDDE5;
-        }
-
-        .nav-link:hover {
-            background: rgba(15, 164, 175, 0.1);
-            color: #AFDDE5;
-        }
-
-        .nav-link.active {
-            background: rgba(15, 164, 175, 0.1);
-            border: 1px solid rgba(175, 221, 229, 0.3);
-            color: #AFDDE5;
-        }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .input-field {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 1rem;
-            width: 100%;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .input-field::placeholder {
-            color: #6B7280;
-        }
-
-        .input-field:focus {
-            border-color: rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-            outline: none;
-        }
-
-        select.input-field {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-            color: black !important;
-            background-color: white !important;
-        }
-
-        select.input-field option {
-            color: black !important;
-            background-color: white !important;
-            padding: 0.5rem;
-        }
-
-        .step {
-            display: none;
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .progress-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .progress-step {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            position: relative;
-            z-index: 1;
-        }
-
-        .progress-step.active {
-            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
-            border-color: transparent;
-        }
-
-        .progress-step.completed {
-            background: #10B981;
-            border-color: transparent;
-        }
-
-        .progress-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-50%);
-        }
-
-        .progress-line-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
-            transition: width 0.3s ease;
-        }
-
-        .event-summary {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 1.5rem;
-        }
-    </style>
-</head>
-<body class="min-h-screen">
-    <nav class="fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <a href="{{ url_for('home') }}" class="text-2xl font-bold gradient-text">Encypherist</a>
-                <a href="{{ url_for('home') }}" class="text-sm text-gray-300 hover:text-white transition-colors">← Back to Events</a>
-            </div>
-        </div>
-    </nav>
-
-    <main class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
         <div class="glass p-8">
             <h2 class="text-3xl font-bold mb-8 text-center gradient-text">Book Event</h2>
 
@@ -263,7 +36,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                                <p><span class="text-white font-medium">Event:</span> {{ event.name }}</p>
+                                <p><span class="text-white font-medium">Event:</span> {{ event.title }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -276,7 +49,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <p><span class="text-white font-medium">Location:</span> {{ event.venue }}</p>
+                                <p><span class="text-white font-medium">Location:</span> {{ event.location }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -346,57 +119,57 @@
                 </div>
             </form>
         </div>
-    </main>
+    </div>
+</div>
 
-    <script>
-        let currentStep = 1;
+<script>
+    let currentStep = 1;
 
-        function updateProgress() {
-            const progressLine = document.querySelector('.progress-line-fill');
-            progressLine.style.width = ((currentStep - 1) * 50) + '%';
+    function updateProgress() {
+        const progressLine = document.querySelector('.progress-line-fill');
+        progressLine.style.width = ((currentStep - 1) * 50) + '%';
 
-            document.querySelectorAll('.progress-step').forEach((step, index) => {
-                const stepNum = index + 1;
-                step.classList.remove('active', 'completed');
-                if (stepNum === currentStep) {
-                    step.classList.add('active');
-                } else if (stepNum < currentStep) {
-                    step.classList.add('completed');
-                }
-            });
-        }
-
-        function showStep(step) {
-            document.querySelectorAll('.step').forEach(s => {
-                s.classList.remove('active');
-            });
-            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
-            currentStep = step;
-            updateProgress();
-        }
-
-        function nextStep(currentStep) {
-            if (currentStep === 2) {
-                // Update summary before showing step 3
-                const form = document.getElementById('bookingForm');
-                const summary = document.getElementById('summary');
-                summary.innerHTML = `
-                    <p><span class="text-white">Name:</span> ${form.name.value}</p>
-                    <p><span class="text-white">Email:</span> ${form.email.value}</p>
-                    <p><span class="text-white">Mobile:</span> ${form.mobile.value}</p>
-                    <p><span class="text-white">Branch:</span> ${form.branch.value}</p>
-                    <p><span class="text-white">Year:</span> ${form.year.value}</p>
-                `;
+        document.querySelectorAll('.progress-step').forEach((step, index) => {
+            const stepNum = index + 1;
+            step.classList.remove('active', 'completed');
+            if (stepNum === currentStep) {
+                step.classList.add('active');
+            } else if (stepNum < currentStep) {
+                step.classList.add('completed');
             }
-            showStep(currentStep + 1);
-        }
+        });
+    }
 
-        function prevStep(currentStep) {
-            showStep(currentStep - 1);
-        }
-
-        // Initialize progress bar
+    function showStep(step) {
+        document.querySelectorAll('.step').forEach(s => {
+            s.classList.remove('active');
+        });
+        document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+        currentStep = step;
         updateProgress();
-    </script>
-</body>
-</html>
+    }
+
+    function nextStep(currentStep) {
+        if (currentStep === 2) {
+            // Update summary before showing step 3
+            const form = document.getElementById('bookingForm');
+            const summary = document.getElementById('summary');
+            summary.innerHTML = `
+                <p><span class="text-white">Name:</span> ${form.name.value}</p>
+                <p><span class="text-white">Email:</span> ${form.email.value}</p>
+                <p><span class="text-white">Mobile:</span> ${form.mobile.value}</p>
+                <p><span class="text-white">Branch:</span> ${form.branch.value}</p>
+                <p><span class="text-white">Year:</span> ${form.year.value}</p>
+            `;
+        }
+        showStep(currentStep + 1);
+    }
+
+    function prevStep(currentStep) {
+        showStep(currentStep - 1);
+    }
+
+    // Initialize progress bar
+    updateProgress();
+</script>
+{% endblock %}

@@ -164,7 +164,11 @@
             <div class="container mx-auto">
                 <form action="{{ url_for('send_message', user_id=other_user.id) }}" method="POST" class="flex gap-4">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="text" name="content" class="message-input" placeholder="Type your message..." required>
+                    <input type="text" 
+                           name="content"
+                           placeholder="Type your message..." 
+                           class="flex-1 message-input py-3 px-4 text-sm"
+                           required>
                     <button type="submit" class="btn-send">Send</button>
                 </form>
             </div>
