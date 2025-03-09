@@ -118,9 +118,9 @@ class Event(db.Model):
     
     # Relationships
     bookings = db.relationship('Booking', backref='event', lazy=True)
-    notifications = db.relationship('Notification', backref='event', lazy='dynamic')
-    messages = db.relationship('Message', backref='event', lazy='dynamic')
-    reviews = db.relationship('Review', backref='event', lazy=True)
+    notifications = db.relationship('Notification', backref='event_notification', lazy='dynamic')
+    messages = db.relationship('Message', backref='event_message', lazy='dynamic')
+    reviews = db.relationship('Review', backref='event_review', lazy=True)
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -181,9 +181,6 @@ class Notification(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     sent = db.Column(db.Boolean, default=False)
     error = db.Column(db.Text, nullable=True)
-
-    # Relationships
-    event = db.relationship('Event', backref='event_notifications', lazy='dynamic')
 
 class NotificationPreference(db.Model):
     id = db.Column(db.Integer, primary_key=True)
