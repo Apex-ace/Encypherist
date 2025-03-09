@@ -372,16 +372,8 @@
             </div>
             <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
                 <p>&copy; 2025 Encypherist. All rights reserved.</p>
-                
-                <!-- Database Clear Form -->
-                <form action="{{ url_for('clear_database') }}" method="POST" class="mt-4" onsubmit="return confirm('WARNING: This will delete ALL data from the database. Are you sure?');">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <!-- <button type="submit" class="text-red-400 hover:text-red-300 transition-colors text-sm">
-                        Clear Database
-                    </button> -->
-                </form>
             </div>
-    </div>
+        </div>
     </footer>
 
     <script>
