@@ -57,7 +57,7 @@ class User(UserMixin, db.Model):
     messages_received = db.relationship('Message', foreign_keys='Message.receiver_id', backref='receiver', lazy='dynamic')
     notifications = db.relationship('Notification', backref='user', lazy='dynamic')
     notification_preferences = db.relationship('NotificationPreference', backref='user', uselist=False)
-    bookings = db.relationship('Booking', backref='user', lazy='dynamic')
+    bookings = db.relationship('Booking', backref='user_profile', lazy='dynamic')
     events = db.relationship('Event', foreign_keys='Event.organizer_id', backref='organizer', lazy='dynamic')
 
 class Event(db.Model):
@@ -95,7 +95,6 @@ class Booking(db.Model):
     branch = db.Column(db.String(50), nullable=True)
     year = db.Column(db.String(10), nullable=True)
     
-    user = db.relationship('User', backref=db.backref('bookings', lazy=True))
     event = db.relationship('Event', backref=db.backref('bookings', lazy=True))
 
 class UserActivity(db.Model):
@@ -737,7 +736,7 @@ def view_ticket(booking_id):
     try:
         booking = Booking.query.options(
             db.joinedload(Booking.event),
-            db.joinedload(Booking.user)
+            db.joinedload(Booking.user_profile)
         ).get_or_404(booking_id)
         
         if booking.user_id != current_user.id:
